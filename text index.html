@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroConnect – Conectamos agricultores con compradores</title>
+  <meta name="description" content="Publica tus lotes de cosecha o encuentra producto fresco directo del productor." />
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS por CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bosque: "#0f3d2e",   // verde oscuro: header, fondos de ventanas
+            hoja: "#1f7a4d",     // verde principal: botones
+            hojaosc: "#17603c",
+            menta: "#dcefe3",    // verde claro: badges
+            brote: "#f1f8f3",    // verde muy claro
+            lima: "#a7d46f",     // acento
+            fondo: "#f4f8f5",
+            tinta: "#10241a",    // texto
+            musgo: "#4a6356",    // texto secundario
+            borde: "#d6e6db",
+            linea: "#b9cfc1",
+          },
+          fontFamily: {
+            sans: ["Inter", "system-ui", "sans-serif"],
+            display: ["Outfit", "system-ui", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+  <style type="text/tailwindcss">
+    @layer components {
+      .input { @apply h-12 w-full rounded-[10px] border border-linea bg-white px-3.5 text-[15px] text-tinta placeholder:text-musgo/70 focus:border-hoja focus:outline-none focus:ring-2 focus:ring-hoja/40; }
+      textarea.input { @apply h-auto py-3; }
+      .label { @apply mb-1.5 block text-sm font-semibold; }
+      .btn { @apply inline-flex h-[52px] items-center justify-center gap-2.5 rounded-xl px-7 text-base font-semibold transition disabled:opacity-60; }
+      .btn-primary { @apply btn bg-hoja text-white hover:bg-hojaosc; }
+      .btn-outline { @apply btn border border-linea bg-white text-tinta hover:border-hoja; }
+      .btn-ghost { @apply btn border border-hoja text-hoja hover:bg-brote; }
+      .card { @apply rounded-3xl border border-borde bg-white p-8 sm:p-10; }
+      .badge { @apply inline-flex self-start rounded-full bg-menta px-3 py-1.5 text-[13px] font-semibold text-bosque; }
+      .chip { @apply flex min-h-[44px] cursor-pointer items-center gap-2 rounded-full border border-linea bg-white px-4 text-[15px] transition has-[:checked]:border-hoja has-[:checked]:bg-brote has-[:checked]:font-semibold has-[:checked]:text-bosque; }
+      .h1 { @apply font-display text-3xl font-bold text-bosque; }
+      .navlink { @apply font-medium text-menta hover:text-white; }
+      .tab { @apply h-12 border-b-[3px] border-transparent px-4 text-[15px] font-semibold text-musgo hover:text-bosque; }
+      .tab[aria-selected="true"] { @apply border-hoja text-bosque; }
+    }
+    [data-screen] { display: none; }
+    [data-screen].activa { display: block; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-fondo font-sans text-tinta antialiased">
+
+<!-- =====================================================================
+     HEADER (cambia los enlaces según la pantalla)
+     ===================================================================== -->
+<header class="bg-bosque px-6">
+  <div class="mx-auto flex min-h-[72px] max-w-6xl flex-wrap items-center justify-between gap-4">
+    <a href="#/" class="flex items-center gap-2.5 font-display text-[22px] font-bold text-white">
+      <svg class="h-7 w-7 text-lima" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      AgroConnect
+    </a>
+    <nav id="nav" aria-label="Principal" class="flex flex-wrap items-center gap-6"></nav>
+  </div>
+</header>
+
+<!-- =====================================================================
+     01 · INICIO – ELEGIR ROL
+     ===================================================================== -->
+<section data-screen="inicio">
+  <main class="mx-auto max-w-6xl px-6 pb-20 pt-16">
+    <div class="grid items-center gap-14 md:grid-cols-2">
+      <div class="flex flex-col gap-5">
+        <span class="badge">Del campo directo al comprador</span>
+        <h1 class="font-display text-5xl font-bold leading-[1.05] text-bosque md:text-6xl">Conectamos agricultores con compradores</h1>
+        <p class="max-w-lg text-lg leading-relaxed text-musgo">Publica tus lotes de cosecha o encuentra producto fresco en origen. Sin intermediarios, con contacto directo por WhatsApp o correo.</p>
+        <a href="#/lotes" class="self-start font-semibold text-hoja hover:text-bosque">Ver lotes en venta →</a>
+      </div>
+
+      <form id="form-rol" class="flex flex-col gap-5 rounded-3xl border border-borde bg-white p-8">
+        <fieldset class="flex flex-col gap-4">
+          <legend class="mb-1 font-display text-2xl font-semibold">¿Cómo quieres usar AgroConnect?</legend>
+          <p class="text-[15px] text-musgo">Elige tu perfil para crear tu cuenta.</p>
+
+          <label class="flex cursor-pointer items-center gap-4 rounded-2xl border border-linea p-5 transition hover:border-hoja has-[:checked]:border-2 has-[:checked]:border-hoja has-[:checked]:bg-brote">
+            <input type="radio" name="rol" value="agricultor" checked class="sr-only" />
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-hoja text-white">
+              <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
+            </span>
+            <span class="flex flex-1 flex-col gap-1">
+              <span class="font-display text-xl font-semibold">Soy Agricultor</span>
+              <span class="text-sm text-musgo">Crea el perfil de tu chacra y publica tus lotes de cosecha.</span>
+            </span>
+          </label>
+
+          <label class="flex cursor-pointer items-center gap-4 rounded-2xl border border-linea p-5 transition hover:border-hoja has-[:checked]:border-2 has-[:checked]:border-hoja has-[:checked]:bg-brote">
+            <input type="radio" name="rol" value="comprador" class="sr-only" />
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-menta text-bosque">
+              <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            </span>
+            <span class="flex flex-1 flex-col gap-1">
+              <span class="font-display text-xl font-semibold">Soy Comprador</span>
+              <span class="text-sm text-musgo">Persona o empresa: encuentra lotes y contacta al productor.</span>
+            </span>
+          </label>
+        </fieldset>
+        <button type="submit" class="btn-primary">Continuar</button>
+        <p class="text-center text-sm text-musgo">¿Ya tienes cuenta? <a href="#" class="font-semibold text-hoja">Inicia sesión</a></p>
+      </form>
+    </div>
+
+    <div id="como-funciona" class="mt-20 grid gap-6 sm:grid-cols-3">
+      <div class="flex flex-col gap-2 rounded-2xl border border-borde bg-white p-6"><span class="font-display text-3xl font-bold text-hoja">1</span><h3 class="font-display text-lg font-semibold">Crea tu perfil</h3><p class="text-sm text-musgo">Agricultor con su chacra o comprador persona / empresa.</p></div>
+      <div class="flex flex-col gap-2 rounded-2xl border border-borde bg-white p-6"><span class="font-display text-3xl font-bold text-hoja">2</span><h3 class="font-display text-lg font-semibold">Publica o explora lotes</h3><p class="text-sm text-musgo">Producto, cantidad estimada, unidad y precio sugerido.</p></div>
+      <div class="flex flex-col gap-2 rounded-2xl border border-borde bg-white p-6"><span class="font-display text-3xl font-bold text-hoja">3</span><h3 class="font-display text-lg font-semibold">Contacta directo</h3><p class="text-sm text-musgo">WhatsApp, llamada o correo con el productor.</p></div>
+    </div>
+  </main>
+</section>
+
+<!-- =====================================================================
+     02 / 09 · CREAR CUENTA (Google o correo) – agricultor y persona
+     ===================================================================== -->
+<section data-screen="registro">
+  <main class="mx-auto max-w-[480px] px-6 pb-20 pt-16">
+    <div class="card flex flex-col gap-5">
+      <span class="badge" id="registro-badge">Cuenta de Agricultor</span>
+      <h1 class="h1">Crea tu cuenta</h1>
+      <p class="text-[15px] leading-relaxed text-musgo" id="registro-texto">Publica tus cosechas y recibe contactos de compradores en todo el país.</p>
+
+      <button type="button" id="btn-google" class="flex h-[52px] items-center justify-center gap-3 rounded-xl border border-linea bg-white font-semibold hover:border-hoja">
+        <svg viewBox="0 0 48 48" class="h-5 w-5" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        Continuar con Google
+      </button>
+
+      <div class="flex items-center gap-3 text-[13px] text-musgo"><span class="h-px flex-1 bg-borde"></span>o con tu correo<span class="h-px flex-1 bg-borde"></span></div>
+
+      <form id="form-registro" class="flex flex-col gap-5">
+        <div><label class="label" for="reg-correo">Correo electrónico</label><input id="reg-correo" name="correo" type="email" required class="input" placeholder="tucorreo@ejemplo.com" autocomplete="email" /></div>
+        <button type="submit" class="btn-primary">Continuar</button>
+      </form>
+      <p class="text-center text-sm text-musgo">¿Ya tienes cuenta? <a href="#" class="font-semibold text-hoja">Inicia sesión</a></p>
+    </div>
+    <p class="mt-5 text-center text-xs text-musgo">Al continuar aceptas los Términos y la Política de privacidad de AgroConnect.</p>
+  </main>
+</section>
+
+<!-- =====================================================================
+     03 · AGRICULTOR – DATOS PERSONALES
+     ===================================================================== -->
+<section data-screen="agricultor-datos">
+  <main class="mx-auto max-w-3xl px-6 pb-20 pt-12">
+    <div class="mb-6 flex flex-col gap-2">
+      <span class="text-[13px] font-semibold text-hoja">Paso 1 de 3 · Datos personales</span>
+      <div class="grid grid-cols-3 gap-1.5"><span class="h-1.5 rounded bg-hoja"></span><span class="h-1.5 rounded bg-borde"></span><span class="h-1.5 rounded bg-borde"></span></div>
+    </div>
+    <form id="form-agricultor" class="card flex flex-col gap-6">
+      <div><h1 class="h1">Cuéntanos sobre ti</h1><p class="mt-1.5 text-[15px] text-musgo">Estos datos aparecerán en tu perfil de productor.</p></div>
+      <div data-foto="agr-foto"></div>
+      <div class="grid gap-5 sm:grid-cols-2" data-datos-personales></div>
+      <p class="hidden rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-800" data-error role="alert"></p>
+      <div class="flex flex-wrap justify-between gap-3">
+        <a href="#/agricultor/registro" class="btn-outline">Atrás</a>
+        <button type="submit" class="btn-primary">Crear cuenta y continuar</button>
+      </div>
+    </form>
+  </main>
+</section>
+
+<!-- =====================================================================
+     04 · PERFIL DE LA CHACRA / FINCA
+     ===================================================================== -->
+<section data-screen="agricultor-finca">
+  <main class="mx-auto max-w-4xl px-6 pb-20 pt-12">
+    <div class="mb-6 flex flex-col gap-2">
+      <span class="text-[13px] font-semibold text-hoja">Paso 2 de 3 · Perfil de la chacra</span>
+      <div class="grid grid-cols-3 gap-1.5"><span class="h-1.5 rounded bg-hoja"></span><span class="h-1.5 rounded bg-hoja"></span><span class="h-1.5 rounded bg-borde"></span></div>
+    </div>
+    <form id="form-finca" class="card flex flex-col gap-8">
+      <div><h1 class="h1">Crea el perfil de tu chacra / finca</h1><p class="mt-1.5 text-[15px] text-musgo">Los compradores verán esta información en cada lote que publiques.</p></div>
+
+      <fieldset class="grid gap-5 sm:grid-cols-2">
+        <legend class="mb-4 font-display text-lg font-semibold">Datos generales</legend>
+        <div><label class="label" for="f-finca">Nombre de la chacra / finca</label><input id="f-finca" name="nombre_finca" required class="input" placeholder="Ej. Finca Los Andes" /></div>
+        <div><label class="label" for="f-productor">Nombre del productor</label><input id="f-productor" name="nombre_productor" required class="input" placeholder="Ej. Rosa Quispe Mamani" /></div>
+        <div><label class="label" for="f-cultivo">Cultivo principal</label>
+          <select id="f-cultivo" name="cultivo_principal" required class="input"><option value="">Selecciona un cultivo</option><option>Papa</option><option>Maíz</option><option>Café</option><option>Cacao</option><option>Palta</option><option>Uva</option><option>Arroz</option><option>Quinua</option><option>Cebolla</option><option>Mandarina</option><option>Otro</option></select></div>
+        <div><label class="label" for="f-otros">Otros cultivos</label><input id="f-otros" name="otros_cultivos" class="input" placeholder="Ej. haba, olluco, oca" /></div>
+        <div><label class="label" for="f-area">Área cultivable (hectáreas)</label><input id="f-area" name="area_hectareas" type="number" min="0" step="0.1" class="input" placeholder="Ej. 3.5" /></div>
+        <div><label class="label" for="f-riego">Tipo de riego</label>
+          <select id="f-riego" name="riego" class="input"><option value="">Selecciona</option><option value="secano">Secano (lluvia)</option><option value="gravedad">Gravedad</option><option value="goteo">Goteo</option><option value="aspersion">Aspersión</option></select></div>
+      </fieldset>
+
+      <fieldset class="grid gap-5 sm:grid-cols-3">
+        <legend class="mb-4 font-display text-lg font-semibold">Ubicación de la chacra</legend>
+        <div><label class="label" for="f-depto">Departamento</label><select id="f-depto" name="departamento" required class="input" data-departamentos></select></div>
+        <div><label class="label" for="f-prov">Provincia</label><input id="f-prov" name="provincia" required class="input" placeholder="Ej. Huancayo" /></div>
+        <div><label class="label" for="f-dist">Distrito</label><input id="f-dist" name="distrito" class="input" placeholder="Ej. Sapallanga" /></div>
+        <div class="sm:col-span-3"><label class="label" for="f-ref">Dirección o referencia</label><input id="f-ref" name="direccion_referencia" class="input" placeholder="Ej. Km 12 carretera central, frente al colegio" /></div>
+        <div class="flex h-44 items-center justify-center gap-2.5 rounded-2xl border border-borde bg-brote text-sm font-medium text-musgo sm:col-span-3">
+          <svg class="h-5 w-5 text-hoja" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          Mapa: marca la ubicación de tu parcela
+        </div>
+      </fieldset>
+
+      <fieldset class="flex flex-col gap-3">
+        <legend class="mb-3 text-sm font-semibold">Certificaciones</legend>
+        <div class="flex flex-wrap gap-2.5">
+          <label class="chip"><input type="checkbox" name="certificaciones" value="Orgánico" class="h-[18px] w-[18px] accent-hoja" />Orgánico</label>
+          <label class="chip"><input type="checkbox" name="certificaciones" value="Comercio justo" class="h-[18px] w-[18px] accent-hoja" />Comercio justo</label>
+          <label class="chip"><input type="checkbox" name="certificaciones" value="GlobalG.A.P." class="h-[18px] w-[18px] accent-hoja" />GlobalG.A.P.</label>
+        </div>
+      </fieldset>
+      <div><label class="label" for="f-desc">Descripción de la chacra</label><textarea id="f-desc" name="descripcion" rows="3" class="input" placeholder="Cuenta cómo cultivas, altitud, temporada de cosecha…"></textarea></div>
+
+      <div class="flex flex-wrap justify-between gap-3">
+        <a href="#/agricultor/datos" class="btn-outline">Atrás</a>
+        <button type="submit" class="btn-primary">Guardar perfil de chacra</button>
+      </div>
+    </form>
+  </main>
+</section>
+
+<!-- =====================================================================
+     05 · MIS PUBLICACIONES (anteriores + publicar nueva)
+     ===================================================================== -->
+<section data-screen="agricultor-publicaciones">
+  <main class="mx-auto flex max-w-6xl flex-col gap-8 px-6 pb-20 pt-10">
+    <div class="flex flex-wrap items-center gap-5 rounded-3xl border border-borde bg-white p-6">
+      <div class="flex h-[88px] w-[88px] items-center justify-center rounded-2xl bg-menta">
+        <svg class="h-10 w-10 text-hoja" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 22h20"/><path d="M3 22V11l9-7 9 7v11"/><path d="M9 22v-6h6v6"/></svg>
+      </div>
+      <div class="flex min-w-[260px] flex-1 flex-col gap-1">
+        <h1 class="h1" id="pub-finca">Finca Los Andes</h1>
+        <span class="text-[15px] text-musgo" id="pub-finca-info">Rosa Quispe Mamani · Sapallanga, Huancayo – Junín · Cultivo principal: Papa</span>
+      </div>
+      <a href="#/agricultor/finca" class="btn-ghost">Editar perfil</a>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <h2 class="font-display text-2xl font-semibold">Publicaciones anteriores</h2>
+        <span class="text-sm text-musgo" id="pub-count"></span>
+      </div>
+      <div id="pub-lista" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"></div>
+    </div>
+
+    <button type="button" id="btn-nueva" class="flex h-[60px] items-center gap-2.5 self-center rounded-full bg-hoja px-9 text-[17px] font-semibold text-white hover:bg-hojaosc">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Publicar nueva publicación
+    </button>
+  </main>
+</section>
+
+<!-- =====================================================================
+     07 · PAGO CON YAPE (7%)
+     ===================================================================== -->
+<section data-screen="agricultor-pago">
+  <main class="mx-auto max-w-5xl px-6 pb-20 pt-12">
+    <div class="mb-6 flex flex-col gap-2">
+      <span class="text-[13px] font-semibold text-hoja">Paso 3 de 3 · Pago de publicación</span>
+      <div class="grid grid-cols-3 gap-1.5"><span class="h-1.5 rounded bg-hoja"></span><span class="h-1.5 rounded bg-hoja"></span><span class="h-1.5 rounded bg-hoja"></span></div>
+    </div>
+    <div class="flex flex-wrap gap-6">
+      <div class="flex min-w-[300px] flex-1 flex-col items-center gap-4 rounded-3xl border border-borde bg-white p-8 text-center">
+        <h1 class="font-display text-2xl font-bold text-bosque">Paga con Yape</h1>
+        <p class="text-[15px] text-musgo">Escanea el código desde tu app Yape.</p>
+        <div class="rounded-2xl border-2 border-hoja bg-white p-4" id="yape-qr"></div>
+        <div class="flex flex-col gap-0.5">
+          <span class="text-sm text-musgo">Titular</span>
+          <span class="font-semibold" id="yape-titular"></span>
+          <span class="text-[15px] text-musgo" id="yape-numero"></span>
+        </div>
+      </div>
+
+      <form id="form-pago" class="flex min-w-[320px] flex-1 flex-col gap-5 rounded-3xl border border-borde bg-white p-8">
+        <h2 class="font-display text-xl font-semibold">Resumen del pago</h2>
+        <div>
+          <label class="label" for="pago-monto">Valor estimado del lote (S/)</label>
+          <input id="pago-monto" name="monto_base" type="number" min="0" step="0.01" required class="input" />
+          <span class="mt-1.5 block text-xs text-musgo" id="pago-detalle"></span>
+        </div>
+        <div class="flex justify-between text-[15px]"><span class="text-musgo">Porcentaje de la tarifa</span><span class="font-semibold" id="pago-pct"></span></div>
+        <div class="flex flex-col gap-1 rounded-2xl bg-bosque p-5 text-white">
+          <span class="text-sm text-menta">Monto a transferir por Yape</span>
+          <span class="font-display text-4xl font-bold" id="pago-total" aria-live="polite">S/ 0.00</span>
+        </div>
+        <div><label class="label" for="pago-op">N° de operación Yape</label><input id="pago-op" name="numero_operacion" required inputmode="numeric" class="input" placeholder="Ej. 01234567" /></div>
+        <div data-foto="captura" data-foto-label="Captura del pago (opcional)"></div>
+        <button type="submit" class="btn-primary">Ya pagué, publicar mi lote</button>
+        <p class="text-[13px] text-musgo">Tu lote se publicará cuando validemos el pago.</p>
+      </form>
+    </div>
+  </main>
+</section>
+
+<!-- =====================================================================
+     08 · COMPRADOR – ¿PERSONA O EMPRESA?
+     ===================================================================== -->
+<section data-screen="comprador">
+  <main class="mx-auto flex max-w-4xl flex-col gap-8 px-6 pb-20 pt-16">
+    <div class="flex flex-col items-center gap-2 text-center">
+      <span class="badge self-center">Cuenta de Comprador</span>
+      <h1 class="font-display text-4xl font-bold text-bosque">¿Cómo vas a comprar?</h1>
+      <p class="text-musgo">Elige el tipo de cuenta que mejor te describe.</p>
+    </div>
+    <div class="grid gap-6 sm:grid-cols-2">
+      <a href="#/comprador/persona/registro" class="flex flex-col gap-3.5 rounded-3xl border-2 border-hoja bg-white p-8 transition hover:-translate-y-0.5">
+        <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-hoja text-white"><svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></span>
+        <span class="font-display text-2xl font-semibold">Soy persona</span>
+        <span class="text-[15px] leading-relaxed text-musgo">Compras para tu hogar, bodega, restaurante o puesto de mercado.</span>
+        <span class="font-semibold text-hoja">Continuar →</span>
+      </a>
+      <a href="#/comprador/empresa" class="flex flex-col gap-3.5 rounded-3xl border border-linea bg-white p-8 transition hover:-translate-y-0.5 hover:border-hoja">
+        <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-menta text-bosque"><svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></svg></span>
+        <span class="font-display text-2xl font-semibold">Soy empresa</span>
+        <span class="text-[15px] leading-relaxed text-musgo">Compras con RUC para distribuidora, agroexportadora o industria.</span>
+        <span class="font-semibold text-hoja">Continuar →</span>
+      </a>
+    </div>
+  </main>
+</section>
+
+<!-- =====================================================================
+     10 · COMPRADOR PERSONA – DATOS + PREFERENCIAS
+     ===================================================================== -->
+<section data-screen="persona-datos">
+  <main class="mx-auto max-w-3xl px-6 pb-20 pt-12">
+    <form id="form-persona" class="card flex flex-col gap-7">
+      <div>
+        <span class="text-[13px] font-semibold text-hoja">Comprador · Persona</span>
+        <h1 class="h1 mt-1">Completa tu perfil</h1>
+        <p class="mt-1.5 text-[15px] text-musgo">Así los productores sabrán quién los contacta.</p>
+      </div>
+      <div class="grid gap-5 sm:grid-cols-2" data-datos-personales></div>
+
+      <div class="flex flex-col gap-5 border-t border-borde pt-6">
+        <h2 class="font-display text-lg font-semibold">Preferencias de compra</h2>
+        <fieldset><legend class="mb-3 text-sm font-semibold">¿Qué productos te interesan?</legend><div class="flex flex-wrap gap-2.5" data-categorias="preferencias"></div></fieldset>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div><label class="label" for="p-frec">Frecuencia de compra</label><select id="p-frec" name="frecuencia_compra" class="input"><option>Semanal</option><option>Quincenal</option><option>Mensual</option><option>Por temporada</option></select></div>
+          <div><label class="label" for="p-zona">Zona de entrega</label><input id="p-zona" name="zona_entrega" class="input" placeholder="Ej. Lima – San Juan de Lurigancho" /></div>
+        </div>
+      </div>
+
+      <div class="border-t border-borde pt-6" data-foto="per-foto"></div>
+      <p class="hidden rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-800" data-error role="alert"></p>
+      <button type="submit" class="btn-primary h-14 text-[17px]">Crear perfil</button>
+    </form>
+  </main>
+</section>
+
+<!-- =====================================================================
+     11 · COMPRADOR EMPRESA (ventanita)
+     ===================================================================== -->
+<section data-screen="empresa" class="min-h-[calc(100vh-72px)] bg-bosque">
+  <main class="px-4 py-16">
+    <form id="form-empresa" role="dialog" aria-labelledby="titulo-empresa" class="mx-auto flex max-w-[560px] flex-col gap-5 rounded-3xl bg-white p-8 sm:p-9">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="text-[13px] font-semibold text-hoja">Comprador · Empresa</span>
+          <h1 id="titulo-empresa" class="h1 mt-1">Datos de tu empresa</h1>
+        </div>
+        <a href="#/comprador" aria-label="Cerrar" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brote text-bosque hover:bg-menta"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></a>
+      </div>
+      <div><label class="label" for="e-nombre">Nombre comercial</label><input id="e-nombre" name="nombre_comercial" required class="input" placeholder="Ej. Distribuidora Valle Fresco" autocomplete="organization" /></div>
+      <div><label class="label" for="e-ruc">RUC o registro fiscal</label><input id="e-ruc" name="ruc" required class="input" placeholder="RUC de 11 dígitos o registro fiscal" /><span class="mt-1.5 block text-xs text-musgo">En Perú: RUC de 11 dígitos.</span></div>
+      <fieldset><legend class="mb-3 text-sm font-semibold">Preferencias de compra</legend><div class="flex flex-wrap gap-2.5" data-categorias="preferencias"></div></fieldset>
+      <div><label class="label" for="e-vol">Volumen mensual estimado</label><select id="e-vol" name="volumen_mensual" class="input"><option>Menos de 1 tonelada</option><option>1 a 10 toneladas</option><option>10 a 50 toneladas</option><option>Más de 50 toneladas</option></select></div>
+      <div><label class="label" for="e-det">Detalle de lo que buscas</label><textarea id="e-det" name="detalle_busqueda" rows="3" class="input" placeholder="Calibre, certificaciones, zona de recojo…"></textarea></div>
+      <p class="hidden rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-800" data-error role="alert"></p>
+      <button type="submit" class="btn-primary h-14 text-[17px]">Guardar e ingresar</button>
+    </form>
+  </main>
+</section>
+
+<!-- =====================================================================
+     12 · LOTES EN VENTA
+     ===================================================================== -->
+<section data-screen="lotes">
+  <div class="bg-hoja px-6 py-10">
+    <div class="mx-auto flex max-w-6xl flex-col gap-5">
+      <h1 class="font-display text-4xl font-bold text-white">Lotes en venta</h1>
+      <form id="form-busqueda" role="search" class="flex flex-wrap gap-3">
+        <label for="b-texto" class="sr-only">Buscar producto o finca</label>
+        <input id="b-texto" name="texto" type="search" class="input h-[52px] min-w-[240px] flex-1 border-0" placeholder="Buscar producto, finca o región…" />
+        <label for="b-region" class="sr-only">Región</label>
+        <select id="b-region" name="region" class="input h-[52px] w-full border-0 sm:w-52"><option value="">Todas las regiones</option></select>
+        <label for="b-cat" class="sr-only">Categoría</label>
+        <select id="b-cat" name="categoria" class="input h-[52px] w-full border-0 sm:w-52"><option value="">Todas las categorías</option></select>
+        <button type="submit" class="h-[52px] rounded-[10px] bg-lima px-7 font-bold text-bosque hover:brightness-95">Buscar</button>
+      </form>
+    </div>
+  </div>
+  <main class="mx-auto flex max-w-6xl flex-col gap-5 px-6 pb-20 pt-8">
+    <span class="text-sm text-musgo" id="lotes-count"></span>
+    <div id="lotes-lista" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
+  </main>
+</section>
+
+<!-- =====================================================================
+     13 · DETALLE DEL LOTE + PERFIL DEL PRODUCTOR
+     ===================================================================== -->
+<section data-screen="lote-detalle">
+  <main class="mx-auto flex max-w-6xl flex-col gap-7 px-6 pb-20 pt-10" id="detalle"></main>
+</section>
+
+<!-- =====================================================================
+     06 · VENTANA: OFRECER LOTE DE COSECHA
+     ===================================================================== -->
+<div id="modal-lote" class="fixed inset-0 z-50 hidden overflow-y-auto bg-bosque/80 px-4 py-10" data-modal>
+  <form id="form-lote" role="dialog" aria-modal="true" aria-labelledby="titulo-lote" class="mx-auto w-full max-w-3xl overflow-hidden rounded-3xl bg-white">
+    <div class="flex items-start justify-between gap-4 px-8 pt-7">
+      <div>
+        <span class="text-[13px] font-semibold text-hoja" id="lote-finca">Nueva publicación</span>
+        <h2 id="titulo-lote" class="h1 mt-1">Ofrecer lote de cosecha</h2>
+      </div>
+      <button type="button" data-cerrar aria-label="Cerrar" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brote text-bosque hover:bg-menta"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+
+    <div role="tablist" class="mt-5 flex gap-2 border-b border-borde px-8">
+      <button type="button" role="tab" class="tab" aria-selected="true" data-tab="datos">Datos del lote</button>
+      <button type="button" role="tab" class="tab" aria-selected="false" data-tab="extra">Detalles extra</button>
+    </div>
+
+    <div class="flex flex-col gap-5 px-8 py-7">
+      <div role="tabpanel" data-panel="datos" class="grid gap-5 sm:grid-cols-2">
+        <div><label class="label" for="l-prod">Producto</label><input id="l-prod" name="producto" required class="input" placeholder="Ej. Papa amarilla" /></div>
+        <div><label class="label" for="l-var">Variedad</label><input id="l-var" name="variedad" class="input" placeholder="Ej. Tumbay" /></div>
+        <div><label class="label" for="l-cant">Cantidad estimada</label><input id="l-cant" name="cantidad_estimada" type="number" min="0" step="any" required class="input" placeholder="Ej. 2000" /></div>
+        <div><label class="label" for="l-uni">Unidad</label><select id="l-uni" name="unidad" class="input" data-unidades></select></div>
+        <div class="sm:col-span-2"><label class="label" for="l-precio">Precio sugerido por unidad (S/)</label><input id="l-precio" name="precio_sugerido" type="number" min="0" step="0.01" required class="input" placeholder="Ej. 2.80" /></div>
+      </div>
+
+      <div role="tabpanel" data-panel="extra" class="hidden grid-cols-1 gap-5 sm:grid-cols-2">
+        <div><label class="label" for="l-cal">Calidad / categoría</label><select id="l-cal" name="calidad" class="input"><option>Primera</option><option>Segunda</option><option>Tercera</option><option>Mixta</option></select></div>
+        <div><label class="label" for="l-fecha">Disponible desde</label><input id="l-fecha" name="disponible_desde" type="date" class="input" /></div>
+        <fieldset class="sm:col-span-2">
+          <legend class="mb-2 text-sm font-semibold">Forma de entrega</legend>
+          <div class="flex flex-wrap gap-5">
+            <label class="flex min-h-[44px] items-center gap-2"><input type="radio" name="entrega" value="recojo_chacra" checked class="h-5 w-5 accent-hoja" />Recojo en chacra</label>
+            <label class="flex min-h-[44px] items-center gap-2"><input type="radio" name="entrega" value="entrega_mercado" class="h-5 w-5 accent-hoja" />Entrega en mercado</label>
+            <label class="flex min-h-[44px] items-center gap-2"><input type="radio" name="entrega" value="envio_coordinar" class="h-5 w-5 accent-hoja" />Envío a coordinar</label>
+          </div>
+        </fieldset>
+        <div class="sm:col-span-2">
+          <span class="label">Fotos del lote</span>
+          <label for="l-fotos" class="flex h-24 cursor-pointer items-center justify-center gap-2.5 rounded-xl border-2 border-dashed border-hoja bg-brote font-semibold text-bosque">
+            <svg class="h-5 w-5 text-hoja" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
+            <span id="l-fotos-txt">Subir hasta 6 fotos</span>
+          </label>
+          <input id="l-fotos" name="fotos" type="file" accept="image/*" multiple class="sr-only" />
+        </div>
+        <div class="sm:col-span-2"><label class="label" for="l-com">Comentarios para el comprador</label><textarea id="l-com" name="comentarios" rows="3" class="input" placeholder="Calibre, estado de la cosecha, empaque…"></textarea></div>
+      </div>
+
+      <div class="flex flex-col gap-2.5 rounded-2xl border border-borde bg-brote px-5 py-4">
+        <div class="flex justify-between text-[15px]"><span class="text-musgo">Valor estimado del lote</span><span class="font-semibold" id="lote-total">S/ 0.00</span></div>
+        <div class="flex justify-between text-[15px]"><span class="text-musgo" id="lote-pct-label">Tarifa de publicación</span><span class="font-semibold text-hoja" id="lote-comision">S/ 0.00</span></div>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap justify-between gap-3 px-8 pb-8">
+      <button type="button" data-cerrar class="btn-outline">Cancelar</button>
+      <button type="submit" class="btn-primary">Publicar lote a compradores</button>
+    </div>
+  </form>
+</div>
+
+<!-- =====================================================================
+     14 · VENTANA: ESTOY INTERESADO (WhatsApp, llamada, correo)
+     ===================================================================== -->
+<div id="modal-contacto" class="fixed inset-0 z-50 hidden overflow-y-auto bg-bosque/80 px-4 py-16" data-modal>
+  <div role="dialog" aria-modal="true" aria-labelledby="contacto-nombre" class="mx-auto flex max-w-[480px] flex-col gap-5 rounded-3xl bg-white p-8">
+    <div class="flex justify-end">
+      <button type="button" data-cerrar aria-label="Cerrar" class="flex h-11 w-11 items-center justify-center rounded-full bg-brote text-bosque hover:bg-menta"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="-mt-6 flex flex-col items-center gap-2.5 text-center">
+      <span aria-hidden="true" id="contacto-ini" class="flex h-[88px] w-[88px] items-center justify-center rounded-full bg-hoja font-display text-3xl font-bold text-white"></span>
+      <h2 id="contacto-nombre" class="h1"></h2>
+      <span class="text-[15px] text-musgo" id="contacto-lote"></span>
+    </div>
+    <div class="flex flex-col gap-3">
+      <a id="c-wsp" target="_blank" rel="noopener noreferrer" class="flex min-h-[64px] items-center gap-3.5 rounded-2xl bg-hoja px-5 text-white hover:bg-hojaosc">
+        <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+        <span class="flex flex-col"><span class="font-semibold">Escribir por WhatsApp</span><span class="text-sm text-menta" data-tel></span></span>
+      </a>
+      <a id="c-tel" class="flex min-h-[64px] items-center gap-3.5 rounded-2xl border-2 border-hoja bg-white px-5 text-bosque hover:bg-brote">
+        <svg class="h-6 w-6 shrink-0 text-hoja" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span class="flex flex-col"><span class="font-semibold">Llamar al productor</span><span class="text-sm text-musgo" data-tel></span></span>
+      </a>
+      <a id="c-mail" class="flex min-h-[64px] items-center gap-3.5 rounded-2xl border border-borde bg-brote px-5 text-bosque hover:border-hoja">
+        <svg class="h-6 w-6 shrink-0 text-hoja" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span class="flex flex-col"><span class="font-semibold">Enviar correo electrónico</span><span class="text-sm text-musgo" id="c-mail-txt"></span></span>
+      </a>
+    </div>
+    <button type="button" data-cerrar class="self-center p-2.5 font-semibold text-hoja">Volver al lote</button>
+  </div>
+</div>
+
+<!-- =====================================================================
+     SUPABASE – PREPARADO PARA EL SIGUIENTE PASO
+     1. Descomenta las dos líneas de abajo.
+     2. Pon tu URL y tu "anon key" (Supabase → Project Settings → API).
+     3. En la función enviarDatos() (más abajo) activa el bloque marcado.
+     ===================================================================== -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
+<!-- <script>const supabase = window.supabase.createClient("TU_SUPABASE_URL", "TU_SUPABASE_ANON_KEY");</script> -->
+
+<script>
+/* =====================================================================
+   CONFIGURACIÓN
+   ===================================================================== */
+const CONFIG = {
+  comisionPorcentaje: 7, // % que se cobra por publicar
+  yape: {
+    titular: "AgroConnect [NOMBRE DEL TITULAR]",
+    numero: "[NÚMERO YAPE]",
+    qrImagen: "", // ej. "yape-qr.png" (súbela junto a este index.html). Vacío = QR de muestra.
+  },
+};
+
+const UNIDADES = [
+  { v: "kg", label: "Kilogramos (kg)", corto: "kg" },
+  { v: "t", label: "Toneladas (t)", corto: "t" },
+  { v: "saco", label: "Sacos", corto: "sacos" },
+  { v: "caja", label: "Cajas / jabas", corto: "cajas" },
+  { v: "arroba", label: "Arrobas", corto: "arrobas" },
+  { v: "unidad", label: "Unidades", corto: "unidades" },
+];
+const CATEGORIAS = ["Tubérculos", "Frutas", "Hortalizas", "Granos y cereales", "Café y cacao", "Orgánicos"];
+const DEPARTAMENTOS = ["Amazonas","Áncash","Apurímac","Arequipa","Ayacucho","Cajamarca","Callao","Cusco","Huancavelica","Huánuco","Ica","Junín","La Libertad","Lambayeque","Lima","Loreto","Madre de Dios","Moquegua","Pasco","Piura","Puno","San Martín","Tacna","Tumbes","Ucayali"];
+const ENTREGAS = { recojo_chacra: "Recojo en chacra", entrega_mercado: "Entrega en mercado", envio_coordinar: "Envío a coordinar" };
+
+/* =====================================================================
+   DATOS DE EJEMPLO (en el siguiente paso vendrán de Supabase)
+   WhatsApp en formato internacional sin "+": 51 + número (Perú)
+   ===================================================================== */
+const WSP_EJEMPLO = "51999999999";
+const LOTES = [
+  { id: "papa-los-andes", producto: "Papa amarilla", variedad: "Tumbay", categoria: "Tubérculos", cantidad: 2000, unidad: "kg", precio: 2.8, calidad: "Primera", disponible: "2026-11-15", entrega: "recojo_chacra", comentarios: "Papa seleccionada, calibre mediano a grande. Se entrega en sacos de 50 kg.",
+    finca: { nombre: "Finca Los Andes", depto: "Junín", prov: "Huancayo", dist: "Sapallanga" },
+    productor: { nombres: "Rosa", apellidos: "Quispe Mamani", edad: 46, wsp: WSP_EJEMPLO, correo: "rosa.quispe@ejemplo.com" },
+    historial: [["Haba verde", "40 sacos", "10/10/2026"], ["Olluco", "800 kg", "25/09/2026"], ["Papa canchán", "3 t", "08/09/2026"]] },
+  { id: "uva-santa-rosa", producto: "Uva Red Globe", variedad: "Red Globe", categoria: "Frutas", cantidad: 300, unidad: "caja", precio: 38, calidad: "Primera", disponible: "2026-12-01", entrega: "entrega_mercado", comentarios: "Cajas de 8 kg, cosecha de diciembre.",
+    finca: { nombre: "Chacra Santa Rosa", depto: "Ica", prov: "Chincha", dist: "Sunampe" },
+    productor: { nombres: "Juan", apellidos: "Mendoza Ríos", edad: 52, wsp: WSP_EJEMPLO, correo: "juan.mendoza@ejemplo.com" },
+    historial: [["Uva Italia", "250 cajas", "15/01/2026"]] },
+  { id: "cafe-el-mirador", producto: "Café pergamino", variedad: "Catimor", categoria: "Café y cacao", cantidad: 25, unidad: "saco", precio: 620, calidad: "Primera", disponible: "2026-11-20", entrega: "envio_coordinar", comentarios: "Sacos de 46 kg, secado al sol.",
+    finca: { nombre: "Finca El Mirador", depto: "Junín", prov: "Satipo", dist: "Pangoa" },
+    productor: { nombres: "Luis", apellidos: "Huamán Cárdenas", edad: 39, wsp: WSP_EJEMPLO, correo: "luis.huaman@ejemplo.com" },
+    historial: [["Café pergamino", "30 sacos", "20/07/2026"]] },
+  { id: "mandarina-valle-verde", producto: "Mandarina", variedad: "W. Murcott", categoria: "Frutas", cantidad: 4, unidad: "t", precio: 1900, calidad: "Segunda", disponible: "2026-11-12", entrega: "recojo_chacra", comentarios: "Fruta para mercado mayorista.",
+    finca: { nombre: "Chacra Valle Verde", depto: "Lima", prov: "Huaral", dist: "Aucallama" },
+    productor: { nombres: "María", apellidos: "Torres Vega", edad: 44, wsp: WSP_EJEMPLO, correo: "maria.torres@ejemplo.com" },
+    historial: [] },
+  { id: "cacao-san-martin", producto: "Cacao en grano", variedad: "CCN-51", categoria: "Café y cacao", cantidad: 900, unidad: "kg", precio: 14, calidad: "Primera", disponible: "2026-11-18", entrega: "envio_coordinar", comentarios: "Grano fermentado y seco.",
+    finca: { nombre: "Finca San Martín", depto: "San Martín", prov: "Moyobamba", dist: "Jepelacio" },
+    productor: { nombres: "Pedro", apellidos: "Rojas Paredes", edad: 58, wsp: WSP_EJEMPLO, correo: "pedro.rojas@ejemplo.com" },
+    historial: [["Cacao en grano", "700 kg", "02/08/2026"]] },
+  { id: "cebolla-las-lomas", producto: "Cebolla roja", variedad: "Arequipeña", categoria: "Hortalizas", cantidad: 120, unidad: "saco", precio: 45, calidad: "Primera", disponible: "2026-11-14", entrega: "entrega_mercado", comentarios: "Sacos de 50 kg.",
+    finca: { nombre: "Chacra Las Lomas", depto: "Arequipa", prov: "Arequipa", dist: "Cerro Colorado" },
+    productor: { nombres: "Ana", apellidos: "Flores Ccama", edad: 35, wsp: WSP_EJEMPLO, correo: "ana.flores@ejemplo.com" },
+    historial: [["Ajo", "60 sacos", "11/05/2026"]] },
+];
+
+const MIS_PUBLICACIONES = [
+  { producto: "Papa amarilla", cantidad: 2000, unidad: "kg", precio: 2.8, fecha: "02/11/2026", estado: "activo" },
+  { producto: "Papa huayro", cantidad: 1500, unidad: "kg", precio: 2.5, fecha: "20/10/2026", estado: "activo" },
+  { producto: "Haba verde", cantidad: 40, unidad: "saco", precio: 85, fecha: "05/10/2026", estado: "vendido" },
+  { producto: "Olluco", cantidad: 800, unidad: "kg", precio: 2.2, fecha: "18/09/2026", estado: "vendido" },
+];
+
+/* Estado de la sesión mientras el usuario navega */
+const estado = {
+  tipoRegistro: "agricultor", // agricultor | comprador_persona
+  correo: "",
+  finca: { nombre_finca: "Finca Los Andes", nombre_productor: "Rosa Quispe Mamani", ubicacion: "Sapallanga, Huancayo – Junín", cultivo_principal: "Papa" },
+  loteActual: null, // lote que se está pagando
+  archivos: {},     // fotos adjuntadas (File)
+};
+
+/* =====================================================================
+   ENVÍO DE DATOS – AQUÍ SE CONECTA SUPABASE EN EL SIGUIENTE PASO
+   Todos los formularios llaman a esta función con el nombre de la tabla
+   (ver supabase/schema.sql) y un objeto con las columnas.
+   ===================================================================== */
+async function enviarDatos(tabla, datos, archivos = {}) {
+  console.log(`[AgroConnect] → ${tabla}`, datos, archivos);
+
+  /* ---------- SUPABASE (siguiente paso): descomenta este bloque ----------
+  // Subir archivos (fotos) a Supabase Storage y guardar su URL
+  for (const [campo, file] of Object.entries(archivos)) {
+    if (!file) continue;
+    const ruta = `${tabla}/${crypto.randomUUID()}-${file.name}`;
+    const { error: errSubida } = await supabase.storage.from("archivos").upload(ruta, file);
+    if (errSubida) throw errSubida;
+    datos[`${campo}_url`] = supabase.storage.from("archivos").getPublicUrl(ruta).data.publicUrl;
+  }
+  const { data, error } = await supabase.from(tabla).insert(datos).select().single();
+  if (error) throw error;
+  return data;
+  ------------------------------------------------------------------------- */
+
+  return { ok: true, ...datos };
+}
+
+/* =====================================================================
+   UTILIDADES
+   ===================================================================== */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const soles = (n) => "S/ " + Number(n || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const unidadCorta = (u) => UNIDADES.find((x) => x.v === u)?.corto ?? u;
+const ir = (ruta) => (location.hash = "#" + ruta);
+
+/** Lee un formulario y devuelve un objeto (los checkbox con el mismo name se agrupan en un array) */
+function leerFormulario(form) {
+  const fd = new FormData(form);
+  const datos = {};
+  for (const [k, v] of fd.entries()) {
+    if (v instanceof File) continue; // los archivos se manejan aparte
+    const multiples = form.querySelectorAll(`[name="${k}"][type="checkbox"]`).length > 0;
+    if (multiples) (datos[k] ??= []).push(v);
+    else datos[k] = typeof v === "string" ? v.trim() : v;
+  }
+  $$('input[type="checkbox"]', form).forEach((c) => (datos[c.name] ??= []));
+  return datos;
+}
+
+function mostrarError(form, msg) {
+  const box = $("[data-error]", form);
+  if (!box) return;
+  box.textContent = msg || "";
+  box.classList.toggle("hidden", !msg);
+}
+
+/* =====================================================================
+   PLANTILLAS REUTILIZABLES (datos personales, foto, chips, selects)
+   ===================================================================== */
+function plantillaDatosPersonales(prefijo) {
+  const campo = (name, label, attrs = "") =>
+    `<div><label class="label" for="${prefijo}-${name}">${label}</label><input id="${prefijo}-${name}" name="${name}" class="input" ${attrs} /></div>`;
+  return [
+    campo("nombres", "Nombres", 'required placeholder="Ej. Rosa María" autocomplete="given-name"'),
+    campo("apellidos", "Apellidos", 'required placeholder="Ej. Quispe Mamani" autocomplete="family-name"'),
+    campo("fecha_nacimiento", "Fecha de nacimiento", 'type="date" required'),
+    campo("correo", "Correo electrónico", 'type="email" required placeholder="tucorreo@ejemplo.com" autocomplete="email"'),
+    campo("usuario", "Usuario", 'required placeholder="@tuusuario" autocomplete="username"'),
+    campo("telefono_whatsapp", "Celular (WhatsApp)", 'type="tel" placeholder="+51 9__ ___ ___" autocomplete="tel"'),
+    campo("password", "Contraseña", 'type="password" required minlength="8" placeholder="Mínimo 8 caracteres" autocomplete="new-password"'),
+    campo("confirmar_password", "Confirmar contraseña", 'type="password" required placeholder="Repite tu contraseña" autocomplete="new-password"'),
+  ].join("");
+}
+
+function plantillaFoto(id, label = "Foto de perfil") {
+  return `
+    <div class="flex flex-wrap items-center gap-5">
+      <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-hoja bg-menta" data-preview>
+        <svg class="h-9 w-9 text-hoja" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+      </div>
+      <div class="flex flex-col gap-2">
+        <span class="text-sm font-semibold">${label}</span>
+        <label for="${id}" class="cursor-pointer self-start rounded-[10px] border border-hoja px-4 py-2.5 text-sm font-semibold text-hoja hover:bg-brote">Adjuntar foto</label>
+        <input id="${id}" type="file" accept="image/*" class="sr-only" data-archivo="${id}" />
+        <span class="text-xs text-musgo" data-nombre>JPG o PNG, máximo 5 MB</span>
+      </div>
+    </div>`;
+}
+
+function iniciarPlantillas() {
+  $$("[data-datos-personales]").forEach((el, i) => (el.innerHTML = plantillaDatosPersonales("dp" + i)));
+  $$("[data-foto]").forEach((el) => (el.innerHTML = plantillaFoto(el.dataset.foto, el.dataset.fotoLabel)));
+  $$("[data-categorias]").forEach((el) => {
+    el.innerHTML = CATEGORIAS.map((c) => `<label class="chip"><input type="checkbox" name="${el.dataset.categorias}" value="${c}" class="h-[18px] w-[18px] accent-hoja" />${c}</label>`).join("");
+  });
+  $$("[data-departamentos]").forEach((el) => (el.innerHTML = `<option value="">Selecciona</option>` + DEPARTAMENTOS.map((d) => `<option>${d}</option>`).join("")));
+  $$("[data-unidades]").forEach((el) => (el.innerHTML = UNIDADES.map((u) => `<option value="${u.v}">${u.label}</option>`).join("")));
+
+  // Vista previa de fotos
+  $$("[data-archivo]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const file = input.files[0] || null;
+      estado.archivos[input.dataset.archivo] = file;
+      const caja = input.closest(".flex.flex-wrap");
+      $("[data-nombre]", caja).textContent = file ? file.name : "JPG o PNG, máximo 5 MB";
+      if (file) $("[data-preview]", caja).innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Vista previa" class="h-full w-full object-cover" />`;
+    });
+  });
+}
+
+/* =====================================================================
+   NAVEGACIÓN (rutas con #) + HEADER
+   ===================================================================== */
+const RUTAS = {
+  "/": { screen: "inicio", nav: [["#/lotes", "Lotes en venta"], ["#como-funciona", "Cómo funciona"]] },
+  "/agricultor/registro": { screen: "registro", back: ["#/", "Atrás"], antes: () => configurarRegistro("agricultor") },
+  "/agricultor/datos": { screen: "agricultor-datos", back: ["#/agricultor/registro", "Atrás"] },
+  "/agricultor/finca": { screen: "agricultor-finca", back: ["#/agricultor/datos", "Atrás"] },
+  "/agricultor/publicaciones": { screen: "agricultor-publicaciones", nav: [["#/agricultor/publicaciones", "Mis publicaciones", true], ["#/lotes", "Lotes en venta"], ["#/agricultor/finca", "Mi chacra"]], antes: renderPublicaciones },
+  "/agricultor/pago": { screen: "agricultor-pago", back: ["#/agricultor/publicaciones", "Volver a mis publicaciones"], antes: renderPago },
+  "/comprador": { screen: "comprador", back: ["#/", "Volver al inicio"] },
+  "/comprador/persona/registro": { screen: "registro", back: ["#/comprador", "Atrás"], antes: () => configurarRegistro("comprador_persona") },
+  "/comprador/persona/datos": { screen: "persona-datos", back: ["#/comprador/persona/registro", "Atrás"] },
+  "/comprador/empresa": { screen: "empresa", back: ["#/comprador", "Atrás"] },
+  "/lotes": { screen: "lotes", nav: [["#/lotes", "Lotes en venta", true], ["#/", "Inicio"]], antes: renderLotes },
+  "/lote": { screen: "lote-detalle", back: ["#/lotes", "Lotes en venta"], antes: renderDetalle },
+};
+
+function router() {
+  const hash = location.hash.replace(/^#/, "") || "/";
+  if (!hash.startsWith("/")) return; // anclas internas como #como-funciona
+  const [ruta, param] = hash.startsWith("/lote/") ? ["/lote", decodeURIComponent(hash.slice(6))] : [hash, null];
+  const conf = RUTAS[ruta] || RUTAS["/"];
+
+  cerrarModales();
+  conf.antes?.(param);
+  $$("[data-screen]").forEach((s) => s.classList.toggle("activa", s.dataset.screen === conf.screen));
+
+  const links = (conf.nav || []).map(([href, txt, activo]) =>
+    `<a href="${href}" class="${activo ? "border-b-2 border-lima pb-1 font-semibold text-white" : "navlink"}" ${activo ? 'aria-current="page"' : ""}>${txt}</a>`);
+  if (conf.back) links.push(`<a href="${conf.back[0]}" class="navlink">← ${conf.back[1]}</a>`);
+  $("#nav").innerHTML = links.join("");
+
+  // Prellenar correo en los formularios de datos personales
+  if (estado.correo) $$('input[name="correo"]').forEach((i) => !i.value && (i.value = estado.correo));
+  window.scrollTo(0, 0);
+}
+
+/* =====================================================================
+   MODALES
+   ===================================================================== */
+function abrirModal(id) {
+  const m = document.getElementById(id);
+  m.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  $("input, button", m)?.focus();
+}
+function cerrarModales() {
+  $$("[data-modal]").forEach((m) => m.classList.add("hidden"));
+  document.body.style.overflow = "";
+}
+$$("[data-modal]").forEach((m) => {
+  m.addEventListener("mousedown", (e) => e.target === m && cerrarModales());
+  $$("[data-cerrar]", m).forEach((b) => b.addEventListener("click", cerrarModales));
+});
+document.addEventListener("keydown", (e) => e.key === "Escape" && cerrarModales());
+
+/* =====================================================================
+   01 · INICIO – Elegir rol
+   ===================================================================== */
+function handleSubmitRol(e) {
+  e.preventDefault();
+  const { rol } = leerFormulario(e.target);
+  console.log("[AgroConnect] Rol seleccionado:", rol);
+  ir(rol === "agricultor" ? "/agricultor/registro" : "/comprador");
+}
+$("#form-rol").addEventListener("submit", handleSubmitRol);
+
+/* =====================================================================
+   02 / 09 · CREAR CUENTA (Google o correo)
+   ===================================================================== */
+function configurarRegistro(tipo) {
+  estado.tipoRegistro = tipo;
+  const agr = tipo === "agricultor";
+  $("#registro-badge").textContent = agr ? "Cuenta de Agricultor" : "Comprador · Persona";
+  $("#registro-texto").textContent = agr ? "Publica tus cosechas y recibe contactos de compradores en todo el país." : "Encuentra lotes de cosecha y contacta directo al productor.";
+}
+const siguienteDeRegistro = () => (estado.tipoRegistro === "agricultor" ? "/agricultor/datos" : "/comprador/persona/datos");
+
+$("#btn-google").addEventListener("click", async () => {
+  console.log("[AgroConnect] Continuar con Google:", { tipo: estado.tipoRegistro });
+  // SUPABASE (siguiente paso):
+  // await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + "/#" + siguienteDeRegistro() } });
+  ir(siguienteDeRegistro());
+});
+
+function handleSubmitRegistro(e) {
+  e.preventDefault();
+  const { correo } = leerFormulario(e.target);
+  estado.correo = correo;
+  console.log("[AgroConnect] Registro con correo:", { tipo: estado.tipoRegistro, correo });
+  ir(siguienteDeRegistro());
+}
+$("#form-registro").addEventListener("submit", handleSubmitRegistro);
+
+/* Valida y transforma datos personales a columnas de la tabla `usuarios` */
+function prepararUsuario(d, tipo) {
+  if (d.password.length < 8) return { error: "La contraseña debe tener al menos 8 caracteres." };
+  if (d.password !== d.confirmar_password) return { error: "Las contraseñas no coinciden." };
+  return {
+    fila: {
+      tipo,
+      nombres: d.nombres,
+      apellidos: d.apellidos,
+      fecha_nacimiento: d.fecha_nacimiento || null,
+      correo: d.correo.toLowerCase(),
+      usuario: d.usuario.replace(/^@/, ""),
+      telefono_whatsapp: d.telefono_whatsapp.replace(/\D/g, "") || null,
+      proveedor: "email",
+    },
+  };
+  // Nota: la contraseña NO se guarda en la tabla. En el siguiente paso se usa
+  // supabase.auth.signUp({ email: d.correo, password: d.password })
+}
+
+/* =====================================================================
+   03 · AGRICULTOR – Datos personales
+   ===================================================================== */
+async function handleSubmitAgricultor(e) {
+  e.preventDefault();
+  const form = e.target;
+  const { fila, error } = prepararUsuario(leerFormulario(form), "agricultor");
+  mostrarError(form, error);
+  if (error) return;
+  await enviarDatos("usuarios", fila, { foto_perfil: estado.archivos["agr-foto"] });
+  ir("/agricultor/finca");
+}
+$("#form-agricultor").addEventListener("submit", handleSubmitAgricultor);
+
+/* =====================================================================
+   04 · PERFIL DE LA CHACRA
+   ===================================================================== */
+async function handleSubmitFinca(e) {
+  e.preventDefault();
+  const d = leerFormulario(e.target);
+  const { certificaciones, ...fila } = d;
+  fila.area_hectareas = d.area_hectareas ? Number(d.area_hectareas) : null;
+  fila.riego = d.riego || null;
+  await enviarDatos("fincas", fila);
+  // SUPABASE (siguiente paso): insertar cada certificación en `finca_certificaciones`
+  console.log("[AgroConnect] → finca_certificaciones", certificaciones);
+
+  estado.finca = { ...fila, ubicacion: [fila.distrito, fila.provincia].filter(Boolean).join(", ") + " – " + fila.departamento };
+  ir("/agricultor/publicaciones");
+}
+$("#form-finca").addEventListener("submit", handleSubmitFinca);
+
+/* =====================================================================
+   05 · MIS PUBLICACIONES
+   ===================================================================== */
+const ESTADOS = {
+  activo: ["Activo", "bg-menta text-bosque"],
+  pendiente_pago: ["Pendiente de pago", "bg-amber-100 text-amber-900"],
+  vendido: ["Vendido", "bg-gray-100 text-gray-700"],
+  vencido: ["Vencido", "bg-gray-100 text-gray-700"],
+};
+function renderPublicaciones() {
+  const f = estado.finca;
+  $("#pub-finca").textContent = f.nombre_finca;
+  $("#pub-finca-info").textContent = `${f.nombre_productor} · ${f.ubicacion} · Cultivo principal: ${f.cultivo_principal}`;
+  $("#pub-count").textContent = `${MIS_PUBLICACIONES.length} publicaciones`;
+  $("#pub-lista").innerHTML = MIS_PUBLICACIONES.map((p) => {
+    const [txt, cls] = ESTADOS[p.estado];
+    const u = unidadCorta(p.unidad);
+    return `
+      <article class="flex flex-col overflow-hidden rounded-2xl border border-borde bg-white">
+        <div class="flex h-36 items-center justify-center bg-brote text-[13px] text-musgo">Foto del lote</div>
+        <div class="flex flex-col gap-2 p-4">
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="font-display text-lg font-semibold">${esc(p.producto)}</h3>
+            <span class="rounded-full px-2.5 py-1 text-xs font-semibold ${cls}">${txt}</span>
+          </div>
+          <span class="text-sm text-musgo">${Number(p.cantidad).toLocaleString("es-PE")} ${u} · ${soles(p.precio)} por ${u}</span>
+          <span class="text-[13px] text-musgo">Publicado el ${esc(p.fecha)}</span>
+        </div>
+      </article>`;
+  }).join("");
+}
+$("#btn-nueva").addEventListener("click", () => {
+  $("#form-lote").reset();
+  $("#l-fotos-txt").textContent = "Subir hasta 6 fotos";
+  mostrarTab("datos");
+  calcularLote();
+  $("#lote-finca").textContent = `${estado.finca.nombre_finca} · Nueva publicación`;
+  abrirModal("modal-lote");
+});
+
+/* =====================================================================
+   06 · OFRECER LOTE DE COSECHA (pestañas + cálculo)
+   ===================================================================== */
+function mostrarTab(tab) {
+  $$("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
+  $$("[data-panel]").forEach((p) => {
+    const on = p.dataset.panel === tab;
+    p.classList.toggle("hidden", !on);
+    p.classList.toggle("grid", on);
+  });
+}
+$$("[data-tab]").forEach((b) => b.addEventListener("click", () => mostrarTab(b.dataset.tab)));
+
+function calcularLote() {
+  const total = (Number($("#l-cant").value) || 0) * (Number($("#l-precio").value) || 0);
+  $("#lote-total").textContent = soles(total);
+  $("#lote-comision").textContent = soles(total * CONFIG.comisionPorcentaje / 100);
+  return total;
+}
+["#l-cant", "#l-precio"].forEach((s) => $(s).addEventListener("input", calcularLote));
+$("#l-fotos").addEventListener("change", (e) => {
+  const files = [...e.target.files].slice(0, 6);
+  estado.archivos.fotos_lote = files;
+  $("#l-fotos-txt").textContent = files.length ? `${files.length} foto(s) seleccionada(s)` : "Subir hasta 6 fotos";
+});
+
+async function handleSubmitLote(e) {
+  e.preventDefault();
+  const form = e.target;
+  // Si faltan datos obligatorios de la 1ra pestaña, volver a ella
+  const faltante = $$('[data-panel="datos"] [required]', form).find((i) => !i.value);
+  if (faltante) { mostrarTab("datos"); faltante.focus(); return; }
+
+  const d = leerFormulario(form);
+  const fila = {
+    ...d,
+    cantidad_estimada: Number(d.cantidad_estimada),
+    precio_sugerido: Number(d.precio_sugerido),
+    disponible_desde: d.disponible_desde || null,
+    estado: "pendiente_pago",
+  };
+  const lote = await enviarDatos("lotes", fila);
+  // SUPABASE (siguiente paso): subir estado.archivos.fotos_lote a Storage e insertar en `lote_fotos`
+  estado.loteActual = { ...lote, total: calcularLote() };
+  cerrarModales();
+  ir("/agricultor/pago");
+}
+$("#form-lote").addEventListener("submit", handleSubmitLote);
+
+/* =====================================================================
+   07 · PAGO CON YAPE (7%)
+   ===================================================================== */
+function qrMuestra() {
+  const celdas = [[8,0],[10,1],[12,0],[14,2],[9,3],[11,4],[15,4],[0,8],[3,9],[8,8],[12,7],[14,8],[19,8],[22,9],[1,11],[4,12],[7,11],[11,12],[12,13],[15,11],[17,12],[22,12],[0,15],[5,14],[8,15],[16,15],[20,15],[24,16],[9,18],[11,17],[14,18],[12,20],[8,23],[15,21],[23,23],[18,19],[20,21],[10,10],[13,16]];
+  const ojo = (x, y) => `<rect x="${x}" y="${y}" width="7" height="7" fill="#0f3d2e"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3" fill="#0f3d2e"/>`;
+  return `<svg width="220" height="220" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR de muestra (reemplazar por el QR real de Yape)"><rect width="25" height="25" fill="#fff"/>${ojo(0, 0)}${ojo(18, 0)}${ojo(0, 18)}${celdas.map(([x, y]) => `<rect x="${x}" y="${y}" width="1" height="1" fill="#0f3d2e"/>`).join("")}</svg>`;
+}
+
+function calcularPago() {
+  const base = Number($("#pago-monto").value) || 0;
+  const aPagar = Math.round(base * CONFIG.comisionPorcentaje) / 100;
+  $("#pago-total").textContent = soles(aPagar);
+  return { base, aPagar };
+}
+function renderPago() {
+  $("#yape-qr").innerHTML = CONFIG.yape.qrImagen
+    ? `<img src="${CONFIG.yape.qrImagen}" alt="Código QR de Yape de AgroConnect" width="220" height="220" />`
+    : qrMuestra();
+  $("#yape-titular").textContent = CONFIG.yape.titular;
+  $("#yape-numero").textContent = "Yape: " + CONFIG.yape.numero;
+  $("#pago-pct").textContent = CONFIG.comisionPorcentaje + "%";
+  const l = estado.loteActual;
+  $("#pago-monto").value = l ? l.total.toFixed(2) : "";
+  $("#pago-detalle").textContent = l ? `${l.producto} · ${l.cantidad_estimada.toLocaleString("es-PE")} ${unidadCorta(l.unidad)} × ${soles(l.precio_sugerido)}` : "";
+  calcularPago();
+}
+$("#pago-monto").addEventListener("input", calcularPago);
+
+async function handleSubmitPago(e) {
+  e.preventDefault();
+  const d = leerFormulario(e.target);
+  const { base, aPagar } = calcularPago();
+  await enviarDatos("pagos_publicacion", {
+    monto_base: base,
+    porcentaje: CONFIG.comisionPorcentaje,
+    metodo: "yape",
+    numero_operacion: d.numero_operacion,
+    estado: "pendiente",
+    // lote_id: estado.loteActual.id  ← en el siguiente paso
+  }, { captura: estado.archivos.captura });
+  console.log("[AgroConnect] Monto a pagar por Yape:", aPagar);
+
+  // Mostrar el nuevo lote en "Publicaciones anteriores"
+  const l = estado.loteActual;
+  if (l) MIS_PUBLICACIONES.unshift({ producto: l.producto, cantidad: l.cantidad_estimada, unidad: l.unidad, precio: l.precio_sugerido, fecha: new Date().toLocaleDateString("es-PE"), estado: "pendiente_pago" });
+  estado.loteActual = null;
+  e.target.reset();
+  ir("/agricultor/publicaciones");
+}
+$("#form-pago").addEventListener("submit", handleSubmitPago);
+
+/* =====================================================================
+   10 · COMPRADOR PERSONA
+   ===================================================================== */
+async function handleSubmitPersona(e) {
+  e.preventDefault();
+  const form = e.target;
+  const d = leerFormulario(form);
+  const { fila, error } = prepararUsuario(d, "comprador_persona");
+  const err = error || (d.preferencias.length ? null : "Elige al menos una preferencia de compra.");
+  mostrarError(form, err);
+  if (err) return;
+
+  await enviarDatos("usuarios", fila, { foto_perfil: estado.archivos["per-foto"] });
+  await enviarDatos("perfiles_comprador", { frecuencia_compra: d.frecuencia_compra, zona_entrega: d.zona_entrega });
+  // SUPABASE (siguiente paso): insertar d.preferencias en `preferencias_compra`
+  console.log("[AgroConnect] → preferencias_compra", d.preferencias);
+  ir("/lotes");
+}
+$("#form-persona").addEventListener("submit", handleSubmitPersona);
+
+/* =====================================================================
+   11 · COMPRADOR EMPRESA
+   ===================================================================== */
+async function handleSubmitEmpresa(e) {
+  e.preventDefault();
+  const form = e.target;
+  const { preferencias, ...fila } = leerFormulario(form);
+  const err = preferencias.length ? null : "Elige al menos una preferencia de compra.";
+  mostrarError(form, err);
+  if (err) return;
+
+  await enviarDatos("empresas", fila);
+  // SUPABASE (siguiente paso): insertar preferencias en `preferencias_compra`
+  console.log("[AgroConnect] → preferencias_compra", preferencias);
+  ir("/lotes");
+}
+$("#form-empresa").addEventListener("submit", handleSubmitEmpresa);
+
+/* =====================================================================
+   12 · LOTES EN VENTA (búsqueda y filtros)
+   ===================================================================== */
+function renderLotes() {
+  const texto = $("#b-texto").value.trim().toLowerCase();
+  const region = $("#b-region").value;
+  const categoria = $("#b-cat").value;
+  const lista = LOTES.filter((l) =>
+    (!texto || [l.producto, l.finca.nombre, l.finca.depto, l.finca.prov].some((s) => s.toLowerCase().includes(texto))) &&
+    (!region || l.finca.depto === region) &&
+    (!categoria || l.categoria === categoria));
+
+  $("#lotes-count").textContent = `${lista.length} fincas con lotes disponibles`;
+  $("#lotes-lista").innerHTML = lista.length ? lista.map((l) => {
+    const u = unidadCorta(l.unidad);
+    return `
+      <a href="#/lote/${encodeURIComponent(l.id)}" class="group flex flex-col overflow-hidden rounded-2xl border border-borde bg-white transition hover:-translate-y-0.5 hover:border-hoja">
+        <div class="flex h-44 items-end justify-between bg-brote p-3.5">
+          <span class="text-[13px] text-musgo">Foto de la finca</span>
+          <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-bosque">${esc(l.categoria)}</span>
+        </div>
+        <div class="flex flex-col gap-2.5 p-4">
+          <div class="flex items-center gap-2.5">
+            <span aria-hidden="true" class="flex h-10 w-10 items-center justify-center rounded-full bg-menta text-sm font-bold text-bosque">${esc(l.productor.nombres[0] + l.productor.apellidos[0])}</span>
+            <div class="flex flex-col">
+              <span class="font-display text-lg font-semibold">${esc(l.finca.nombre)}</span>
+              <span class="text-[13px] text-musgo">${esc(l.productor.nombres)} ${esc(l.productor.apellidos.split(" ")[0])} · ${esc(l.finca.prov)}, ${esc(l.finca.depto)}</span>
+            </div>
+          </div>
+          <div class="flex items-baseline justify-between gap-2 border-t border-borde pt-2.5">
+            <span class="text-[15px] font-semibold">${esc(l.producto)} · ${l.cantidad.toLocaleString("es-PE")} ${u}</span>
+            <span class="whitespace-nowrap font-display text-lg font-bold text-hoja">${soles(l.precio)}/${u}</span>
+          </div>
+          <span class="text-sm font-semibold text-hoja group-hover:underline">Ver lote →</span>
+        </div>
+      </a>`;
+  }).join("") : `<p class="col-span-full rounded-2xl border border-borde bg-white p-8 text-center text-musgo">No encontramos lotes con esos filtros.</p>`;
+}
+function handleSubmitBusqueda(e) {
+  e.preventDefault();
+  console.log("[AgroConnect] Búsqueda:", leerFormulario(e.target));
+  renderLotes();
+}
+$("#form-busqueda").addEventListener("submit", handleSubmitBusqueda);
+["#b-region", "#b-cat"].forEach((s) => $(s).addEventListener("change", renderLotes));
+$("#b-texto").addEventListener("input", renderLotes);
+
+/* =====================================================================
+   13 · DETALLE DEL LOTE
+   ===================================================================== */
+function renderDetalle(id) {
+  const l = LOTES.find((x) => x.id === id);
+  const cont = $("#detalle");
+  if (!l) { cont.innerHTML = `<p class="rounded-2xl border border-borde bg-white p-8 text-center text-musgo">Este lote ya no está disponible. <a href="#/lotes" class="font-semibold text-hoja">Ver otros lotes</a></p>`; return; }
+
+  const p = l.productor, f = l.finca, u = unidadCorta(l.unidad);
+  const fecha = l.disponible ? new Date(l.disponible + "T00:00:00").toLocaleDateString("es-PE") : "Inmediata";
+  const detalles = [
+    ["Cantidad estimada", `${l.cantidad.toLocaleString("es-PE")} ${u}`], ["Variedad", l.variedad || "—"], ["Calidad", l.calidad],
+    ["Disponible desde", fecha], ["Entrega", ENTREGAS[l.entrega]], ["Valor estimado", soles(l.cantidad * l.precio)],
+  ];
+
+  cont.innerHTML = `
+    <div class="flex flex-wrap gap-7">
+      <section class="flex min-w-0 flex-[999_1_560px] flex-col gap-5">
+        <div class="flex h-80 items-center justify-center rounded-3xl bg-brote font-medium text-musgo">Foto del producto</div>
+        <div class="flex flex-col gap-5 rounded-3xl border border-borde bg-white p-7">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="flex flex-col gap-1.5">
+              <span class="self-start rounded-full bg-menta px-2.5 py-1 text-xs font-semibold text-bosque">${esc(l.categoria)} · Disponible</span>
+              <h1 class="font-display text-4xl font-bold text-bosque">${esc(l.producto)}</h1>
+              <span class="text-[15px] text-musgo">${esc(f.nombre)} · ${esc(f.prov)}, ${esc(f.depto)}</span>
+            </div>
+            <div class="sm:text-right">
+              <span class="block font-display text-3xl font-bold text-hoja">${soles(l.precio)}</span>
+              <span class="text-sm text-musgo">precio sugerido por ${u}</span>
+            </div>
+          </div>
+          <h2 class="font-display text-xl font-semibold">Detalles del producto</h2>
+          <dl class="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+            ${detalles.map(([k, v]) => `<div class="rounded-xl bg-fondo p-3.5"><dt class="text-[13px] text-musgo">${k}</dt><dd class="mt-1 font-semibold">${esc(v)}</dd></div>`).join("")}
+          </dl>
+          ${l.comentarios ? `<p class="text-[15px] leading-relaxed text-musgo">${esc(l.comentarios)}</p>` : ""}
+        </div>
+      </section>
+
+      <aside class="flex flex-[1_1_340px] flex-col gap-5">
+        <div class="flex flex-col gap-4 rounded-3xl border border-borde bg-white p-6">
+          <h2 class="font-display text-xl font-semibold">Perfil del productor</h2>
+          <div class="flex items-center gap-3.5">
+            <span aria-hidden="true" class="flex h-16 w-16 items-center justify-center rounded-full bg-hoja font-display text-[22px] font-bold text-white">${esc(p.nombres[0] + p.apellidos[0])}</span>
+            <div class="flex flex-col">
+              <span class="font-display text-lg font-semibold">${esc(p.nombres)} ${esc(p.apellidos)}</span>
+              <span class="text-sm text-musgo">${p.edad} años</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <span class="text-sm font-semibold">Ubicación de la parcela</span>
+            <div class="flex h-36 items-center justify-center gap-2 rounded-xl border border-borde bg-brote px-3 text-center text-sm text-musgo">
+              <svg class="h-5 w-5 shrink-0 text-hoja" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+              ${esc(f.dist)}, ${esc(f.prov)} – ${esc(f.depto)}
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3 rounded-3xl border border-borde bg-white p-6">
+          <h2 class="font-display text-xl font-semibold">Historial de ventas</h2>
+          ${l.historial.length ? `
+            <div class="overflow-x-auto"><table class="w-full text-sm">
+              <thead><tr class="border-b border-borde text-left text-musgo"><th scope="col" class="py-2 font-semibold">Producto</th><th scope="col" class="py-2 font-semibold">Cantidad</th><th scope="col" class="py-2 text-right font-semibold">Fecha</th></tr></thead>
+              <tbody>${l.historial.map(([pr, c, fe]) => `<tr class="border-b border-fondo"><td class="py-2.5">${esc(pr)}</td><td class="py-2.5">${esc(c)}</td><td class="py-2.5 text-right text-musgo">${esc(fe)}</td></tr>`).join("")}</tbody>
+            </table></div>` : `<p class="text-sm text-musgo">Aún no tiene ventas registradas en AgroConnect.</p>`}
+          <span class="text-[13px] text-musgo">${l.historial.length} ventas completadas</span>
+        </div>
+      </aside>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-4">
+      <button type="button" id="btn-interesado" class="btn-primary h-[60px] min-w-[256px] text-[17px]">Estoy interesado</button>
+      <button type="button" id="btn-volver" class="btn-outline h-[60px] min-w-[176px] text-[17px]">Volver</button>
+    </div>`;
+
+  $("#btn-interesado").addEventListener("click", () => abrirContacto(l));
+  $("#btn-volver").addEventListener("click", () => (history.length > 1 ? history.back() : ir("/lotes")));
+}
+
+/* =====================================================================
+   14 · ESTOY INTERESADO – WhatsApp abre directamente la app
+   ===================================================================== */
+function abrirContacto(l) {
+  const p = l.productor;
+  const msg = `Hola ${p.nombres}, me interesa tu lote de ${l.producto.toLowerCase()} publicado en AgroConnect.`;
+  const telVisible = "+" + p.wsp.replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/, "$1 $2 $3 $4");
+
+  $("#contacto-ini").textContent = p.nombres[0] + p.apellidos[0];
+  $("#contacto-nombre").textContent = `${p.nombres} ${p.apellidos}`;
+  $("#contacto-lote").textContent = `${l.finca.nombre} · ${l.producto}`;
+  $$("[data-tel]").forEach((s) => (s.textContent = telVisible));
+  $("#c-mail-txt").textContent = p.correo;
+
+  $("#c-wsp").href = `https://wa.me/${p.wsp}?text=${encodeURIComponent(msg)}`; // abre la app de WhatsApp
+  $("#c-tel").href = `tel:+${p.wsp}`;
+  $("#c-mail").href = `mailto:${p.correo}?subject=${encodeURIComponent("Lote de " + l.producto + " – AgroConnect")}&body=${encodeURIComponent(msg)}`;
+
+  const registrar = (canal) => enviarDatos("contactos", { lote_id: l.id, canal });
+  $("#c-wsp").onclick = () => registrar("whatsapp");
+  $("#c-tel").onclick = () => registrar("llamada");
+  $("#c-mail").onclick = () => registrar("correo");
+
+  abrirModal("modal-contacto");
+}
+
+/* =====================================================================
+   INICIO
+   ===================================================================== */
+iniciarPlantillas();
+$("#b-region").innerHTML += [...new Set(LOTES.map((l) => l.finca.depto))].sort().map((r) => `<option>${r}</option>`).join("");
+$("#b-cat").innerHTML += CATEGORIAS.map((c) => `<option>${c}</option>`).join("");
+$("#lote-pct-label").textContent = `Tarifa de publicación (${CONFIG.comisionPorcentaje}%)`;
+window.addEventListener("hashchange", router);
+router();
+</script>
+</body>
+</html>
