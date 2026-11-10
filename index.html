@@ -242,8 +242,8 @@
         <svg class="h-10 w-10 text-hoja" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 22h20"/><path d="M3 22V11l9-7 9 7v11"/><path d="M9 22v-6h6v6"/></svg>
       </div>
       <div class="flex min-w-[260px] flex-1 flex-col gap-1">
-        <h1 class="h1" id="pub-finca">Finca Los Andes</h1>
-        <span class="text-[15px] text-musgo" id="pub-finca-info">Rosa Quispe Mamani · Sapallanga, Huancayo – Junín · Cultivo principal: Papa</span>
+        <h1 class="h1" id="pub-finca">Tu chacra</h1>
+        <span class="text-[15px] text-musgo" id="pub-finca-info"></span>
       </div>
       <a href="#/agricultor/finca" class="btn-ghost">Editar perfil</a>
     </div>
@@ -586,21 +586,26 @@ const LOTES = [
     historial: [["Ajo", "60 sacos", "11/05/2026"]] },
 ];
 
-const MIS_PUBLICACIONES = [
-  { producto: "Papa amarilla", cantidad: 2000, unidad: "kg", precio: 2.8, fecha: "02/11/2026", estado: "activo" },
-  { producto: "Papa huayro", cantidad: 1500, unidad: "kg", precio: 2.5, fecha: "20/10/2026", estado: "activo" },
-  { producto: "Haba verde", cantidad: 40, unidad: "saco", precio: 85, fecha: "05/10/2026", estado: "vendido" },
-  { producto: "Olluco", cantidad: 800, unidad: "kg", precio: 2.2, fecha: "18/09/2026", estado: "vendido" },
-];
-
-/* Estado de la sesión mientras el usuario navega */
+/* Estado de la sesión mientras el usuario navega.
+   El correo y la chacra se recuerdan en este navegador para que el perfil
+   no se pierda al recargar la página. */
+const SESION_KEY = "agroconnect_sesion";
+function leerSesion() {
+  try { return JSON.parse(localStorage.getItem(SESION_KEY)) || {}; } catch { return {}; }
+}
+function guardarSesion() {
+  try { localStorage.setItem(SESION_KEY, JSON.stringify({ correo: estado.correo, finca: estado.finca })); } catch {}
+}
+const sesion = leerSesion();
 const estado = {
   tipoRegistro: "agricultor", // agricultor | comprador_persona
-  correo: "",
-  finca: { nombre_finca: "Finca Los Andes", nombre_productor: "Rosa Quispe Mamani", ubicacion: "Sapallanga, Huancayo – Junín", cultivo_principal: "Papa" },
-  loteActual: null, // lote que se está pagando
-  archivos: {},     // fotos adjuntadas (File)
+  correo: sesion.correo || "",
+  finca: sesion.finca || null, // perfil de chacra del usuario (null = aún no lo crea)
+  loteActual: null,            // lote que se está pagando
+  publicacionesSesion: [],     // lotes guardados en esta sesión (respaldo si no se puede leer la BD)
+  archivos: {},                // fotos adjuntadas (File)
 };
+const nombreFinca = () => estado.finca?.nombre_finca || "Tu chacra";
 
 /* =====================================================================
    GUARDAR EN SUPABASE – tabla `contactos`
@@ -907,6 +912,8 @@ async function handleSubmitAgricultor(e) {
     enviarDatos("registro_agricultor", datosUsuario, { foto_perfil: estado.archivos["agr-foto"] }));
   if (!ok) return;
   estado.correo = datosUsuario.correo;
+  estado.finca = null;          // usuario nuevo: todavía no tiene chacra
+  guardarSesion();
   ir("/agricultor/finca");
 }
 $("#form-agricultor").addEventListener("submit", handleSubmitAgricultor);
@@ -925,6 +932,7 @@ async function handleSubmitFinca(e) {
   if (!ok) return;
 
   estado.finca = { ...fila, ubicacion: [fila.distrito, fila.provincia].filter(Boolean).join(", ") + " – " + fila.departamento };
+  guardarSesion();
   ir("/agricultor/publicaciones");
 }
 $("#form-finca").addEventListener("submit", handleSubmitFinca);
@@ -938,34 +946,78 @@ const ESTADOS = {
   vendido: ["Vendido", "bg-gray-100 text-gray-700"],
   vencido: ["Vencido", "bg-gray-100 text-gray-700"],
 };
-function renderPublicaciones() {
-  const f = estado.finca;
-  $("#pub-finca").textContent = f.nombre_finca;
-  $("#pub-finca-info").textContent = `${f.nombre_productor} · ${f.ubicacion} · Cultivo principal: ${f.cultivo_principal}`;
-  $("#pub-count").textContent = `${MIS_PUBLICACIONES.length} publicaciones`;
-  $("#pub-lista").innerHTML = MIS_PUBLICACIONES.map((p) => {
-    const [txt, cls] = ESTADOS[p.estado];
-    const u = unidadCorta(p.unidad);
-    return `
-      <article class="flex flex-col overflow-hidden rounded-2xl border border-borde bg-white">
-        <div class="flex h-36 items-center justify-center bg-brote text-[13px] text-musgo">Foto del lote</div>
-        <div class="flex flex-col gap-2 p-4">
-          <div class="flex items-center justify-between gap-2">
-            <h3 class="font-display text-lg font-semibold">${esc(p.producto)}</h3>
-            <span class="rounded-full px-2.5 py-1 text-xs font-semibold ${cls}">${txt}</span>
-          </div>
-          <span class="text-sm text-musgo">${Number(p.cantidad).toLocaleString("es-PE")} ${u} · ${soles(p.precio)} por ${u}</span>
-          <span class="text-[13px] text-musgo">Publicado el ${esc(p.fecha)}</span>
+/** Lee de Supabase los lotes publicados por este usuario (filas tipo "lote_cosecha" con su correo) */
+async function cargarPublicaciones() {
+  if (!estado.correo) return [];
+  const { data, error } = await db
+    .from("contactos")
+    .select("id, created_at, datos")
+    .eq("tipo", "lote_cosecha")
+    .eq("email", estado.correo)
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.warn("[AgroConnect] No se pudieron leer las publicaciones (¿ejecutaste la parte 6 de contactos.sql?):", error);
+    return estado.publicacionesSesion; // respaldo: lo creado en esta sesión
+  }
+  return data.map((r) => ({
+    producto: r.datos?.producto ?? "",
+    cantidad: Number(r.datos?.cantidad_estimada) || 0,
+    unidad: r.datos?.unidad ?? "kg",
+    precio: Number(r.datos?.precio_sugerido) || 0,
+    fecha: new Date(r.created_at).toLocaleDateString("es-PE"),
+    estado: r.datos?.estado ?? "pendiente_pago",
+  }));
+}
+
+function tarjetaPublicacion(p) {
+  const [txt, cls] = ESTADOS[p.estado] || ESTADOS.pendiente_pago;
+  const u = unidadCorta(p.unidad);
+  return `
+    <article class="flex flex-col overflow-hidden rounded-2xl border border-borde bg-white">
+      <div class="flex h-36 items-center justify-center bg-brote text-[13px] text-musgo">Foto del lote</div>
+      <div class="flex flex-col gap-2 p-4">
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="font-display text-lg font-semibold">${esc(p.producto)}</h3>
+          <span class="rounded-full px-2.5 py-1 text-xs font-semibold ${cls}">${txt}</span>
         </div>
-      </article>`;
-  }).join("");
+        <span class="text-sm text-musgo">${p.cantidad.toLocaleString("es-PE")} ${u} · ${soles(p.precio)} por ${u}</span>
+        <span class="text-[13px] text-musgo">Publicado el ${esc(p.fecha)}</span>
+      </div>
+    </article>`;
+}
+
+async function renderPublicaciones() {
+  // Cabecera con la chacra real del usuario
+  const f = estado.finca;
+  $("#pub-finca").textContent = nombreFinca();
+  $("#pub-finca-info").textContent = f
+    ? [f.nombre_productor, f.ubicacion, f.cultivo_principal && "Cultivo principal: " + f.cultivo_principal].filter(Boolean).join(" · ")
+    : "Completa el perfil de tu chacra para que los compradores te conozcan.";
+
+  const lista = $("#pub-lista");
+  $("#pub-count").textContent = "";
+  lista.innerHTML = `<p class="col-span-full rounded-2xl border border-borde bg-white p-8 text-center text-musgo">Cargando tus publicaciones…</p>`;
+
+  const publicaciones = await cargarPublicaciones();
+
+  if (!publicaciones.length) {
+    lista.innerHTML = `
+      <div class="col-span-full flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-linea bg-white px-6 py-12 text-center">
+        <svg class="h-10 w-10 text-hoja" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
+        <p class="text-[16px] font-medium text-tinta">Aún no tienes publicaciones creadas. ¡Crea tu primera publicación!</p>
+      </div>`;
+    return;
+  }
+
+  $("#pub-count").textContent = publicaciones.length === 1 ? "1 publicación" : `${publicaciones.length} publicaciones`;
+  lista.innerHTML = publicaciones.map(tarjetaPublicacion).join("");
 }
 $("#btn-nueva").addEventListener("click", () => {
   $("#form-lote").reset();
   $("#l-fotos-txt").textContent = "Subir hasta 6 fotos";
   mostrarTab("datos");
   calcularLote();
-  $("#lote-finca").textContent = `${estado.finca.nombre_finca} · Nueva publicación`;
+  $("#lote-finca").textContent = `${nombreFinca()} · Nueva publicación`;
   abrirModal("modal-lote");
 });
 
@@ -1012,11 +1064,12 @@ async function handleSubmitLote(e) {
   };
   const total = calcularLote();
   fila.valor_estimado = total;
-  fila.finca = estado.finca.nombre_finca;
+  fila.finca = estado.finca?.nombre_finca ?? null;
   const ok = await guardarFormulario(form, () =>
     enviarDatos("lote_cosecha", fila, { fotos_lote: estado.archivos.fotos_lote }));
   if (!ok) return;
   estado.loteActual = { ...fila, total };
+  estado.publicacionesSesion.unshift({ producto: fila.producto, cantidad: fila.cantidad_estimada, unidad: fila.unidad, precio: fila.precio_sugerido, fecha: new Date().toLocaleDateString("es-PE"), estado: "pendiente_pago" });
   cerrarModales();
   ir("/agricultor/pago");
 }
@@ -1064,13 +1117,10 @@ async function handleSubmitPago(e) {
     numero_operacion: d.numero_operacion,
     estado: "pendiente",
     producto: estado.loteActual?.producto ?? null,
-    finca: estado.finca.nombre_finca,
+    finca: estado.finca?.nombre_finca ?? null,
   }, { captura: estado.archivos.captura }));
   if (!ok) return;
 
-  // Mostrar el nuevo lote en "Publicaciones anteriores"
-  const l = estado.loteActual;
-  if (l) MIS_PUBLICACIONES.unshift({ producto: l.producto, cantidad: l.cantidad_estimada, unidad: l.unidad, precio: l.precio_sugerido, fecha: new Date().toLocaleDateString("es-PE"), estado: "pendiente_pago" });
   estado.loteActual = null;
   e.target.reset();
   ir("/agricultor/publicaciones");
@@ -1098,6 +1148,7 @@ async function handleSubmitPersona(e) {
   }, { foto_perfil: estado.archivos["per-foto"] }));
   if (!ok) return;
   estado.correo = datosUsuario.correo;
+  guardarSesion();
   ir("/lotes");
 }
 $("#form-persona").addEventListener("submit", handleSubmitPersona);
