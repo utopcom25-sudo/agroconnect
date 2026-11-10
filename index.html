@@ -223,6 +223,7 @@
       </fieldset>
       <div><label class="label" for="f-desc">Descripción de la chacra</label><textarea id="f-desc" name="descripcion" rows="3" class="input" placeholder="Cuenta cómo cultivas, altitud, temporada de cosecha…"></textarea></div>
 
+      <p class="hidden rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-800" data-error role="alert"></p>
       <div class="flex flex-wrap justify-between gap-3">
         <a href="#/agricultor/datos" class="btn-outline">Atrás</a>
         <button type="submit" class="btn-primary">Guardar perfil de chacra</button>
@@ -297,6 +298,7 @@
         </div>
         <div><label class="label" for="pago-op">N° de operación Yape</label><input id="pago-op" name="numero_operacion" required inputmode="numeric" class="input" placeholder="Ej. 01234567" /></div>
         <div data-foto="captura" data-foto-label="Captura del pago (opcional)"></div>
+        <p class="hidden rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-800" data-error role="alert"></p>
         <button type="submit" class="btn-primary">Ya pagué, publicar mi lote</button>
         <p class="text-[13px] text-musgo">Tu lote se publicará cuando validemos el pago.</p>
       </form>
@@ -470,6 +472,7 @@
       </div>
     </div>
 
+    <div class="px-8"><p class="mb-5 hidden rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-800" data-error role="alert"></p></div>
     <div class="flex flex-wrap justify-between gap-3 px-8 pb-8">
       <button type="button" data-cerrar class="btn-outline">Cancelar</button>
       <button type="submit" class="btn-primary">Publicar lote a compradores</button>
@@ -508,14 +511,23 @@
   </div>
 </div>
 
+<!-- Aviso flotante (guardado / error) -->
+<div id="aviso" role="status" aria-live="polite" class="pointer-events-none fixed inset-x-0 bottom-6 z-[60] hidden justify-center px-4">
+  <div class="rounded-xl px-5 py-3 text-[15px] font-semibold shadow-lg" id="aviso-caja"></div>
+</div>
+
 <!-- =====================================================================
-     SUPABASE – PREPARADO PARA EL SIGUIENTE PASO
-     1. Descomenta las dos líneas de abajo.
-     2. Pon tu URL y tu "anon key" (Supabase → Project Settings → API).
-     3. En la función enviarDatos() (más abajo) activa el bloque marcado.
+     SUPABASE – CONEXIÓN REAL
+     La clave "publishable / anon" es pública por diseño: puede ir en el HTML.
+     La seguridad la dan las políticas RLS de la tabla (ver contactos.sql).
+     NUNCA pongas aquí la clave "service_role" / "secret".
      ===================================================================== -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
-<!-- <script>const supabase = window.supabase.createClient("TU_SUPABASE_URL", "TU_SUPABASE_ANON_KEY");</script> -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://ysqdzvjcvkumnpahqwgr.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_2aFeyxtYOfYJIf-TUBh1_A_FWExulAe";
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
 
 <script>
 /* =====================================================================
@@ -591,28 +603,94 @@ const estado = {
 };
 
 /* =====================================================================
-   ENVÍO DE DATOS – AQUÍ SE CONECTA SUPABASE EN EL SIGUIENTE PASO
-   Todos los formularios llaman a esta función con el nombre de la tabla
-   (ver supabase/schema.sql) y un objeto con las columnas.
+   GUARDAR EN SUPABASE – tabla `contactos`
+   Todos los formularios guardan una fila en `contactos`:
+     tipo             → qué formulario fue (registro_agricultor, finca, lote…)
+     nombre, apellidos, email, telefono, usuario, fecha_nacimiento
+     datos (jsonb)    → el resto de campos de ese formulario
+   La contraseña NUNCA se guarda.
    ===================================================================== */
-async function enviarDatos(tabla, datos, archivos = {}) {
-  console.log(`[AgroConnect] → ${tabla}`, datos, archivos);
+const CAMPOS_FIJOS = {
+  nombre: ["nombres", "nombre_productor", "nombre_comercial"],
+  apellidos: ["apellidos"],
+  email: ["correo", "email"],
+  telefono: ["telefono_whatsapp", "telefono"],
+  usuario: ["usuario"],
+  fecha_nacimiento: ["fecha_nacimiento"],
+};
+const NUNCA_GUARDAR = ["password", "confirmar_password"];
 
-  /* ---------- SUPABASE (siguiente paso): descomenta este bloque ----------
-  // Subir archivos (fotos) a Supabase Storage y guardar su URL
-  for (const [campo, file] of Object.entries(archivos)) {
-    if (!file) continue;
-    const ruta = `${tabla}/${crypto.randomUUID()}-${file.name}`;
-    const { error: errSubida } = await supabase.storage.from("archivos").upload(ruta, file);
-    if (errSubida) throw errSubida;
-    datos[`${campo}_url`] = supabase.storage.from("archivos").getPublicUrl(ruta).data.publicUrl;
+function aFilaContacto(tipo, datos) {
+  const resto = { ...datos };
+  NUNCA_GUARDAR.forEach((k) => delete resto[k]);
+  const fila = { tipo };
+  for (const [col, claves] of Object.entries(CAMPOS_FIJOS)) {
+    const clave = claves.find((k) => resto[k] !== undefined && resto[k] !== "");
+    fila[col] = clave ? resto[clave] : null;
+    claves.forEach((k) => delete resto[k]);
   }
-  const { data, error } = await supabase.from(tabla).insert(datos).select().single();
-  if (error) throw error;
-  return data;
-  ------------------------------------------------------------------------- */
+  fila.datos = resto;
+  return fila;
+}
 
-  return { ok: true, ...datos };
+async function enviarDatos(tipo, datos, archivos = {}) {
+  const fila = aFilaContacto(tipo, datos);
+  // Nombres de las fotos adjuntas (los archivos se pueden subir a Storage más adelante)
+  const nombresArchivos = Object.fromEntries(
+    Object.entries(archivos).filter(([, f]) => f).map(([k, f]) => [k, Array.isArray(f) ? f.map((x) => x.name) : f.name])
+  );
+  if (Object.keys(nombresArchivos).length) fila.datos.archivos = nombresArchivos;
+  // Relaciona finca, lote y pago con el correo de quien se registró
+  if (!fila.email && estado.correo) fila.email = estado.correo;
+
+  console.log("[AgroConnect] Guardando en contactos:", fila);
+  const { error } = await db.from("contactos").insert(fila);
+  if (error) {
+    console.error("[AgroConnect] Error de Supabase:", error);
+    throw new Error(traducirError(error));
+  }
+  return fila;
+}
+
+function traducirError(error) {
+  const m = `${error.code || ""} ${error.message || ""}`;
+  if (/42501|row-level security/i.test(m)) return "Supabase rechazó el guardado por permisos (RLS). Ejecuta el archivo contactos.sql en el SQL Editor.";
+  if (/42P01|does not exist|schema cache/i.test(m)) return "No se encontró la tabla o una columna en Supabase. Ejecuta el archivo contactos.sql en el SQL Editor.";
+  if (/Failed to fetch|NetworkError/i.test(m)) return "No hay conexión con Supabase. Revisa tu internet e inténtalo de nuevo.";
+  return "No se pudo guardar: " + (error.message || "error desconocido");
+}
+
+/** Muestra un aviso flotante. tipo: "ok" | "error" */
+function avisar(texto, tipo = "ok") {
+  const caja = document.getElementById("aviso-caja");
+  caja.textContent = texto;
+  caja.className = "rounded-xl px-5 py-3 text-[15px] font-semibold shadow-lg " + (tipo === "ok" ? "bg-bosque text-white" : "bg-red-700 text-white");
+  const aviso = document.getElementById("aviso");
+  aviso.classList.remove("hidden"); aviso.classList.add("flex");
+  clearTimeout(avisar.t);
+  avisar.t = setTimeout(() => { aviso.classList.add("hidden"); aviso.classList.remove("flex"); }, tipo === "ok" ? 2500 : 6000);
+}
+
+/**
+ * Envuelve el envío de un formulario: desactiva el botón mientras guarda,
+ * muestra el error en el formulario si falla y solo continúa si se guardó.
+ */
+async function guardarFormulario(form, accion) {
+  const boton = form.querySelector('button[type="submit"]');
+  const textoOriginal = boton?.textContent;
+  if (boton) { boton.disabled = true; boton.textContent = "Guardando…"; }
+  mostrarError(form, "");
+  try {
+    await accion();
+    avisar("Datos guardados correctamente");
+    return true;
+  } catch (err) {
+    mostrarError(form, err.message);
+    avisar(err.message, "error");
+    return false;
+  } finally {
+    if (boton) { boton.disabled = false; boton.textContent = textoOriginal; }
+  }
 }
 
 /* =====================================================================
@@ -824,7 +902,11 @@ async function handleSubmitAgricultor(e) {
   const { fila, error } = prepararUsuario(leerFormulario(form), "agricultor");
   mostrarError(form, error);
   if (error) return;
-  await enviarDatos("usuarios", fila, { foto_perfil: estado.archivos["agr-foto"] });
+  const { tipo, ...datosUsuario } = fila;
+  const ok = await guardarFormulario(form, () =>
+    enviarDatos("registro_agricultor", datosUsuario, { foto_perfil: estado.archivos["agr-foto"] }));
+  if (!ok) return;
+  estado.correo = datosUsuario.correo;
   ir("/agricultor/finca");
 }
 $("#form-agricultor").addEventListener("submit", handleSubmitAgricultor);
@@ -834,13 +916,13 @@ $("#form-agricultor").addEventListener("submit", handleSubmitAgricultor);
    ===================================================================== */
 async function handleSubmitFinca(e) {
   e.preventDefault();
-  const d = leerFormulario(e.target);
-  const { certificaciones, ...fila } = d;
+  const form = e.target;
+  const d = leerFormulario(form);
+  const fila = { ...d };
   fila.area_hectareas = d.area_hectareas ? Number(d.area_hectareas) : null;
   fila.riego = d.riego || null;
-  await enviarDatos("fincas", fila);
-  // SUPABASE (siguiente paso): insertar cada certificación en `finca_certificaciones`
-  console.log("[AgroConnect] → finca_certificaciones", certificaciones);
+  const ok = await guardarFormulario(form, () => enviarDatos("perfil_finca", fila));
+  if (!ok) return;
 
   estado.finca = { ...fila, ubicacion: [fila.distrito, fila.provincia].filter(Boolean).join(", ") + " – " + fila.departamento };
   ir("/agricultor/publicaciones");
@@ -928,9 +1010,13 @@ async function handleSubmitLote(e) {
     disponible_desde: d.disponible_desde || null,
     estado: "pendiente_pago",
   };
-  const lote = await enviarDatos("lotes", fila);
-  // SUPABASE (siguiente paso): subir estado.archivos.fotos_lote a Storage e insertar en `lote_fotos`
-  estado.loteActual = { ...lote, total: calcularLote() };
+  const total = calcularLote();
+  fila.valor_estimado = total;
+  fila.finca = estado.finca.nombre_finca;
+  const ok = await guardarFormulario(form, () =>
+    enviarDatos("lote_cosecha", fila, { fotos_lote: estado.archivos.fotos_lote }));
+  if (!ok) return;
+  estado.loteActual = { ...fila, total };
   cerrarModales();
   ir("/agricultor/pago");
 }
@@ -967,17 +1053,20 @@ $("#pago-monto").addEventListener("input", calcularPago);
 
 async function handleSubmitPago(e) {
   e.preventDefault();
-  const d = leerFormulario(e.target);
+  const form = e.target;
+  const d = leerFormulario(form);
   const { base, aPagar } = calcularPago();
-  await enviarDatos("pagos_publicacion", {
+  const ok = await guardarFormulario(form, () => enviarDatos("pago_yape", {
     monto_base: base,
     porcentaje: CONFIG.comisionPorcentaje,
+    monto_a_pagar: aPagar,
     metodo: "yape",
     numero_operacion: d.numero_operacion,
     estado: "pendiente",
-    // lote_id: estado.loteActual.id  ← en el siguiente paso
-  }, { captura: estado.archivos.captura });
-  console.log("[AgroConnect] Monto a pagar por Yape:", aPagar);
+    producto: estado.loteActual?.producto ?? null,
+    finca: estado.finca.nombre_finca,
+  }, { captura: estado.archivos.captura }));
+  if (!ok) return;
 
   // Mostrar el nuevo lote en "Publicaciones anteriores"
   const l = estado.loteActual;
@@ -1000,10 +1089,15 @@ async function handleSubmitPersona(e) {
   mostrarError(form, err);
   if (err) return;
 
-  await enviarDatos("usuarios", fila, { foto_perfil: estado.archivos["per-foto"] });
-  await enviarDatos("perfiles_comprador", { frecuencia_compra: d.frecuencia_compra, zona_entrega: d.zona_entrega });
-  // SUPABASE (siguiente paso): insertar d.preferencias en `preferencias_compra`
-  console.log("[AgroConnect] → preferencias_compra", d.preferencias);
+  const { tipo, ...datosUsuario } = fila;
+  const ok = await guardarFormulario(form, () => enviarDatos("registro_comprador_persona", {
+    ...datosUsuario,
+    preferencias: d.preferencias,
+    frecuencia_compra: d.frecuencia_compra,
+    zona_entrega: d.zona_entrega,
+  }, { foto_perfil: estado.archivos["per-foto"] }));
+  if (!ok) return;
+  estado.correo = datosUsuario.correo;
   ir("/lotes");
 }
 $("#form-persona").addEventListener("submit", handleSubmitPersona);
@@ -1014,15 +1108,13 @@ $("#form-persona").addEventListener("submit", handleSubmitPersona);
 async function handleSubmitEmpresa(e) {
   e.preventDefault();
   const form = e.target;
-  const { preferencias, ...fila } = leerFormulario(form);
-  const err = preferencias.length ? null : "Elige al menos una preferencia de compra.";
+  const fila = leerFormulario(form);
+  const err = fila.preferencias.length ? null : "Elige al menos una preferencia de compra.";
   mostrarError(form, err);
   if (err) return;
 
-  await enviarDatos("empresas", fila);
-  // SUPABASE (siguiente paso): insertar preferencias en `preferencias_compra`
-  console.log("[AgroConnect] → preferencias_compra", preferencias);
-  ir("/lotes");
+  const ok = await guardarFormulario(form, () => enviarDatos("registro_comprador_empresa", fila));
+  if (ok) ir("/lotes");
 }
 $("#form-empresa").addEventListener("submit", handleSubmitEmpresa);
 
@@ -1170,7 +1262,9 @@ function abrirContacto(l) {
   $("#c-tel").href = `tel:+${p.wsp}`;
   $("#c-mail").href = `mailto:${p.correo}?subject=${encodeURIComponent("Lote de " + l.producto + " – AgroConnect")}&body=${encodeURIComponent(msg)}`;
 
-  const registrar = (canal) => enviarDatos("contactos", { lote_id: l.id, canal });
+  const registrar = (canal) =>
+    enviarDatos("interes_lote", { lote_id: l.id, producto: l.producto, finca: l.finca.nombre, productor: `${p.nombres} ${p.apellidos}`, canal })
+      .catch((err) => console.error(err));
   $("#c-wsp").onclick = () => registrar("whatsapp");
   $("#c-tel").onclick = () => registrar("llamada");
   $("#c-mail").onclick = () => registrar("correo");
@@ -1190,3 +1284,4 @@ router();
 </script>
 </body>
 </html>
+
