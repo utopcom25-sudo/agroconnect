@@ -116,7 +116,7 @@
           </label>
         </fieldset>
         <button type="submit" class="btn-primary">Continuar</button>
-        <p class="text-center text-sm text-musgo">¿Ya tienes cuenta? <a href="#" class="font-semibold text-hoja">Inicia sesión</a></p>
+        <p class="text-center text-sm text-musgo">¿Ya tienes cuenta? <a href="#/login" class="font-semibold text-hoja">Inicia sesión</a></p>
       </form>
     </div>
 
@@ -149,9 +149,27 @@
         <div><label class="label" for="reg-correo">Correo electrónico</label><input id="reg-correo" name="correo" type="email" required class="input" placeholder="tucorreo@ejemplo.com" autocomplete="email" /></div>
         <button type="submit" class="btn-primary">Continuar</button>
       </form>
-      <p class="text-center text-sm text-musgo">¿Ya tienes cuenta? <a href="#" class="font-semibold text-hoja">Inicia sesión</a></p>
+      <p class="text-center text-sm text-musgo">¿Ya tienes cuenta? <a href="#/login" class="font-semibold text-hoja">Inicia sesión</a></p>
     </div>
     <p class="mt-5 text-center text-xs text-musgo">Al continuar aceptas los Términos y la Política de privacidad de AgroConnect.</p>
+  </main>
+</section>
+
+<!-- =====================================================================
+     INICIAR SESIÓN (Supabase Auth: correo + contraseña)
+     ===================================================================== -->
+<section data-screen="login">
+  <main class="mx-auto max-w-[480px] px-6 pb-20 pt-16">
+    <form id="form-login" class="card flex flex-col gap-5" novalidate>
+      <span class="badge">AgroConnect</span>
+      <h1 class="h1">Inicia sesión</h1>
+      <p class="text-[15px] leading-relaxed text-musgo">Ingresa con el correo y la contraseña con los que creaste tu cuenta.</p>
+      <div><label class="label" for="login-correo">Correo electrónico</label><input id="login-correo" name="correo" type="email" required class="input" placeholder="tucorreo@ejemplo.com" autocomplete="email" /></div>
+      <div><label class="label" for="login-clave">Contraseña</label><input id="login-clave" name="password" type="password" required class="input" placeholder="Tu contraseña" autocomplete="current-password" /></div>
+      <p class="hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800" data-error role="alert"></p>
+      <button type="submit" class="btn-primary">Ingresar</button>
+      <p class="text-center text-sm text-musgo">¿No tienes cuenta? <a href="#/" class="font-semibold text-hoja">Crea una aquí</a></p>
+    </form>
   </main>
 </section>
 
@@ -191,10 +209,14 @@
 
       <fieldset class="grid gap-5 sm:grid-cols-2">
         <legend class="mb-4 font-display text-lg font-semibold">Datos generales</legend>
-        <div><label class="label" for="f-finca">Nombre de la chacra / finca</label><input id="f-finca" name="nombre_finca" required class="input" placeholder="Ej. Finca Los Andes" /></div>
-        <div><label class="label" for="f-productor">Nombre del productor</label><input id="f-productor" name="nombre_productor" required class="input" placeholder="Ej. Rosa Quispe Mamani" /></div>
+        <div><label class="label" for="f-finca">Nombre de la chacra / finca</label><input id="f-finca" name="nombre_finca" required class="input" placeholder="Nombre de tu chacra o finca" /></div>
+        <div><label class="label" for="f-productor">Nombre del productor</label><input id="f-productor" name="nombre_productor" required class="input" placeholder="Nombre completo del productor" /></div>
         <div><label class="label" for="f-cultivo">Cultivo principal</label>
-          <select id="f-cultivo" name="cultivo_principal" required class="input"><option value="">Selecciona un cultivo</option><option>Papa</option><option>Maíz</option><option>Café</option><option>Cacao</option><option>Palta</option><option>Uva</option><option>Arroz</option><option>Quinua</option><option>Cebolla</option><option>Mandarina</option><option>Otro</option></select></div>
+          <select id="f-cultivo" name="cultivo_principal" required class="input"><option value="">Selecciona un cultivo</option><option>Papa</option><option>Maíz</option><option>Café</option><option>Cacao</option><option>Palta</option><option>Uva</option><option>Arroz</option><option>Quinua</option><option>Cebolla</option><option>Mandarina</option><option value="__otros">Otros...</option></select>
+          <div id="f-cultivo-otro-wrap" class="mt-3 hidden">
+            <label class="label" for="f-cultivo-otro">Escribe tu cultivo</label>
+            <input id="f-cultivo-otro" name="cultivo_otro" class="input" placeholder="Ej. Kiwicha, maracuyá, ají…" />
+          </div></div>
         <div><label class="label" for="f-otros">Otros cultivos</label><input id="f-otros" name="otros_cultivos" class="input" placeholder="Ej. haba, olluco, oca" /></div>
         <div><label class="label" for="f-area">Área cultivable (hectáreas)</label><input id="f-area" name="area_hectareas" type="number" min="0" step="0.1" class="input" placeholder="Ej. 3.5" /></div>
         <div><label class="label" for="f-riego">Tipo de riego</label>
@@ -375,7 +397,7 @@
         </div>
         <a href="#/comprador" aria-label="Cerrar" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brote text-bosque hover:bg-menta"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></a>
       </div>
-      <div><label class="label" for="e-nombre">Nombre comercial</label><input id="e-nombre" name="nombre_comercial" required class="input" placeholder="Ej. Distribuidora Valle Fresco" autocomplete="organization" /></div>
+      <div><label class="label" for="e-nombre">Nombre comercial</label><input id="e-nombre" name="nombre_comercial" required class="input" placeholder="Nombre comercial de tu empresa" autocomplete="organization" /></div>
       <div><label class="label" for="e-ruc">RUC o registro fiscal</label><input id="e-ruc" name="ruc" required class="input" placeholder="RUC de 11 dígitos o registro fiscal" /><span class="mt-1.5 block text-xs text-musgo">En Perú: RUC de 11 dígitos.</span></div>
       <fieldset><legend class="mb-3 text-sm font-semibold">Preferencias de compra</legend><div class="flex flex-wrap gap-2.5" data-categorias="preferencias"></div></fieldset>
       <div><label class="label" for="e-vol">Volumen mensual estimado</label><select id="e-vol" name="volumen_mensual" class="input"><option>Menos de 1 tonelada</option><option>1 a 10 toneladas</option><option>10 a 50 toneladas</option><option>Más de 50 toneladas</option></select></div>
@@ -439,6 +461,7 @@
       <div role="tabpanel" data-panel="datos" class="grid gap-5 sm:grid-cols-2">
         <div><label class="label" for="l-prod">Producto</label><input id="l-prod" name="producto" required class="input" placeholder="Ej. Papa amarilla" /></div>
         <div><label class="label" for="l-var">Variedad</label><input id="l-var" name="variedad" class="input" placeholder="Ej. Tumbay" /></div>
+        <div class="sm:col-span-2"><label class="label" for="l-cat">Categoría</label><select id="l-cat" name="categoria" required class="input" data-categorias-select></select></div>
         <div><label class="label" for="l-cant">Cantidad estimada</label><input id="l-cant" name="cantidad_estimada" type="number" min="0" step="any" required class="input" placeholder="Ej. 2000" /></div>
         <div><label class="label" for="l-uni">Unidad</label><select id="l-uni" name="unidad" class="input" data-unidades></select></div>
         <div class="sm:col-span-2"><label class="label" for="l-precio">Precio sugerido por unidad (S/)</label><input id="l-precio" name="precio_sugerido" type="number" min="0" step="0.01" required class="input" placeholder="Ej. 2.80" /></div>
@@ -554,37 +577,8 @@ const CATEGORIAS = ["Tubérculos", "Frutas", "Hortalizas", "Granos y cereales", 
 const DEPARTAMENTOS = ["Amazonas","Áncash","Apurímac","Arequipa","Ayacucho","Cajamarca","Callao","Cusco","Huancavelica","Huánuco","Ica","Junín","La Libertad","Lambayeque","Lima","Loreto","Madre de Dios","Moquegua","Pasco","Piura","Puno","San Martín","Tacna","Tumbes","Ucayali"];
 const ENTREGAS = { recojo_chacra: "Recojo en chacra", entrega_mercado: "Entrega en mercado", envio_coordinar: "Envío a coordinar" };
 
-/* =====================================================================
-   DATOS DE EJEMPLO (en el siguiente paso vendrán de Supabase)
-   WhatsApp en formato internacional sin "+": 51 + número (Perú)
-   ===================================================================== */
-const WSP_EJEMPLO = "51999999999";
-const LOTES = [
-  { id: "papa-los-andes", producto: "Papa amarilla", variedad: "Tumbay", categoria: "Tubérculos", cantidad: 2000, unidad: "kg", precio: 2.8, calidad: "Primera", disponible: "2026-11-15", entrega: "recojo_chacra", comentarios: "Papa seleccionada, calibre mediano a grande. Se entrega en sacos de 50 kg.",
-    finca: { nombre: "Finca Los Andes", depto: "Junín", prov: "Huancayo", dist: "Sapallanga" },
-    productor: { nombres: "Rosa", apellidos: "Quispe Mamani", edad: 46, wsp: WSP_EJEMPLO, correo: "rosa.quispe@ejemplo.com" },
-    historial: [["Haba verde", "40 sacos", "10/10/2026"], ["Olluco", "800 kg", "25/09/2026"], ["Papa canchán", "3 t", "08/09/2026"]] },
-  { id: "uva-santa-rosa", producto: "Uva Red Globe", variedad: "Red Globe", categoria: "Frutas", cantidad: 300, unidad: "caja", precio: 38, calidad: "Primera", disponible: "2026-12-01", entrega: "entrega_mercado", comentarios: "Cajas de 8 kg, cosecha de diciembre.",
-    finca: { nombre: "Chacra Santa Rosa", depto: "Ica", prov: "Chincha", dist: "Sunampe" },
-    productor: { nombres: "Juan", apellidos: "Mendoza Ríos", edad: 52, wsp: WSP_EJEMPLO, correo: "juan.mendoza@ejemplo.com" },
-    historial: [["Uva Italia", "250 cajas", "15/01/2026"]] },
-  { id: "cafe-el-mirador", producto: "Café pergamino", variedad: "Catimor", categoria: "Café y cacao", cantidad: 25, unidad: "saco", precio: 620, calidad: "Primera", disponible: "2026-11-20", entrega: "envio_coordinar", comentarios: "Sacos de 46 kg, secado al sol.",
-    finca: { nombre: "Finca El Mirador", depto: "Junín", prov: "Satipo", dist: "Pangoa" },
-    productor: { nombres: "Luis", apellidos: "Huamán Cárdenas", edad: 39, wsp: WSP_EJEMPLO, correo: "luis.huaman@ejemplo.com" },
-    historial: [["Café pergamino", "30 sacos", "20/07/2026"]] },
-  { id: "mandarina-valle-verde", producto: "Mandarina", variedad: "W. Murcott", categoria: "Frutas", cantidad: 4, unidad: "t", precio: 1900, calidad: "Segunda", disponible: "2026-11-12", entrega: "recojo_chacra", comentarios: "Fruta para mercado mayorista.",
-    finca: { nombre: "Chacra Valle Verde", depto: "Lima", prov: "Huaral", dist: "Aucallama" },
-    productor: { nombres: "María", apellidos: "Torres Vega", edad: 44, wsp: WSP_EJEMPLO, correo: "maria.torres@ejemplo.com" },
-    historial: [] },
-  { id: "cacao-san-martin", producto: "Cacao en grano", variedad: "CCN-51", categoria: "Café y cacao", cantidad: 900, unidad: "kg", precio: 14, calidad: "Primera", disponible: "2026-11-18", entrega: "envio_coordinar", comentarios: "Grano fermentado y seco.",
-    finca: { nombre: "Finca San Martín", depto: "San Martín", prov: "Moyobamba", dist: "Jepelacio" },
-    productor: { nombres: "Pedro", apellidos: "Rojas Paredes", edad: 58, wsp: WSP_EJEMPLO, correo: "pedro.rojas@ejemplo.com" },
-    historial: [["Cacao en grano", "700 kg", "02/08/2026"]] },
-  { id: "cebolla-las-lomas", producto: "Cebolla roja", variedad: "Arequipeña", categoria: "Hortalizas", cantidad: 120, unidad: "saco", precio: 45, calidad: "Primera", disponible: "2026-11-14", entrega: "entrega_mercado", comentarios: "Sacos de 50 kg.",
-    finca: { nombre: "Chacra Las Lomas", depto: "Arequipa", prov: "Arequipa", dist: "Cerro Colorado" },
-    productor: { nombres: "Ana", apellidos: "Flores Ccama", edad: 35, wsp: WSP_EJEMPLO, correo: "ana.flores@ejemplo.com" },
-    historial: [["Ajo", "60 sacos", "11/05/2026"]] },
-];
+/* Lotes en venta: se cargan SIEMPRE desde Supabase (no hay datos fijos) */
+let lotesCache = [];
 
 /* Estado de la sesión mientras el usuario navega.
    El correo y la chacra se recuerdan en este navegador para que el perfil
@@ -594,12 +588,16 @@ function leerSesion() {
   try { return JSON.parse(localStorage.getItem(SESION_KEY)) || {}; } catch { return {}; }
 }
 function guardarSesion() {
-  try { localStorage.setItem(SESION_KEY, JSON.stringify({ correo: estado.correo, finca: estado.finca })); } catch {}
+  try { localStorage.setItem(SESION_KEY, JSON.stringify({ correo: estado.correo, finca: estado.finca, perfil: estado.perfil, tipo: estado.tipoUsuario })); } catch {}
 }
 const sesion = leerSesion();
 const estado = {
   tipoRegistro: "agricultor", // agricultor | comprador_persona
+  usuarioId: null,             // id de Supabase Auth cuando hay sesión iniciada
+  avisoPendiente: null,
   correo: sesion.correo || "",
+  tipoUsuario: sesion.tipo || null, // agricultor | comprador_persona (del usuario con sesión)
+  perfil: sesion.perfil || null,    // nombres, apellidos, fecha_nacimiento, telefono_whatsapp
   finca: sesion.finca || null, // perfil de chacra del usuario (null = aún no lo crea)
   loteActual: null,            // lote que se está pagando
   publicacionesSesion: [],     // lotes guardados en esta sesión (respaldo si no se puede leer la BD)
@@ -687,7 +685,8 @@ async function guardarFormulario(form, accion) {
   mostrarError(form, "");
   try {
     await accion();
-    avisar("Datos guardados correctamente");
+    avisar(estado.avisoPendiente || "Datos guardados correctamente");
+    estado.avisoPendiente = null;
     return true;
   } catch (err) {
     mostrarError(form, err.message);
@@ -736,8 +735,8 @@ function plantillaDatosPersonales(prefijo) {
   const campo = (name, label, attrs = "") =>
     `<div><label class="label" for="${prefijo}-${name}">${label}</label><input id="${prefijo}-${name}" name="${name}" class="input" ${attrs} /></div>`;
   return [
-    campo("nombres", "Nombres", 'required placeholder="Ej. Rosa María" autocomplete="given-name"'),
-    campo("apellidos", "Apellidos", 'required placeholder="Ej. Quispe Mamani" autocomplete="family-name"'),
+    campo("nombres", "Nombres", 'required placeholder="Tus nombres" autocomplete="given-name"'),
+    campo("apellidos", "Apellidos", 'required placeholder="Tus apellidos" autocomplete="family-name"'),
     campo("fecha_nacimiento", "Fecha de nacimiento", 'type="date" required'),
     campo("correo", "Correo electrónico", 'type="email" required placeholder="tucorreo@ejemplo.com" autocomplete="email"'),
     campo("usuario", "Usuario", 'required placeholder="@tuusuario" autocomplete="username"'),
@@ -766,8 +765,16 @@ function iniciarPlantillas() {
   $$("[data-datos-personales]").forEach((el, i) => (el.innerHTML = plantillaDatosPersonales("dp" + i)));
   $$("[data-foto]").forEach((el) => (el.innerHTML = plantillaFoto(el.dataset.foto, el.dataset.fotoLabel)));
   $$("[data-categorias]").forEach((el) => {
-    el.innerHTML = CATEGORIAS.map((c) => `<label class="chip"><input type="checkbox" name="${el.dataset.categorias}" value="${c}" class="h-[18px] w-[18px] accent-hoja" />${c}</label>`).join("");
+    el.innerHTML = CATEGORIAS.map((c) => `<label class="chip"><input type="checkbox" name="${el.dataset.categorias}" value="${c}" class="h-[18px] w-[18px] accent-hoja" />${c}</label>`).join("")
+      + `<label class="chip"><input type="checkbox" name="${el.dataset.categorias}" value="__otros" class="h-[18px] w-[18px] accent-hoja" data-otros-check />Otros...</label>`;
+    el.insertAdjacentHTML("afterend", `
+      <div class="mt-3 hidden" data-otros-wrap>
+        <label class="label">Escribe qué otros productos o cultivos te interesan
+          <input name="preferencia_otro" class="input mt-1.5 font-normal" placeholder="Ej. Kiwicha, maracuyá, ají…" />
+        </label>
+      </div>`);
   });
+  $$("[data-categorias-select]").forEach((el) => (el.innerHTML = `<option value="">Selecciona</option>` + CATEGORIAS.map((c) => `<option>${c}</option>`).join("")));
   $$("[data-departamentos]").forEach((el) => (el.innerHTML = `<option value="">Selecciona</option>` + DEPARTAMENTOS.map((d) => `<option>${d}</option>`).join("")));
   $$("[data-unidades]").forEach((el) => (el.innerHTML = UNIDADES.map((u) => `<option value="${u.v}">${u.label}</option>`).join("")));
 
@@ -784,10 +791,44 @@ function iniciarPlantillas() {
 }
 
 /* =====================================================================
+   OPCIÓN "OTROS..." – muestra un cuadro de texto obligatorio
+   ===================================================================== */
+function alternarOtro(wrap, visible) {
+  const input = $("input", wrap);
+  wrap.classList.toggle("hidden", !visible);
+  input.required = visible;
+  if (visible) input.focus(); else input.value = "";
+}
+function iniciarOtros() {
+  // Cultivo principal (perfil de la chacra)
+  $("#f-cultivo").addEventListener("change", (e) => alternarOtro($("#f-cultivo-otro-wrap"), e.target.value === "__otros"));
+  // Preferencias de compra (persona y empresa)
+  $$("[data-otros-check]").forEach((chk) => {
+    const wrap = chk.closest("[data-categorias]").nextElementSibling;
+    chk.addEventListener("change", () => alternarOtro(wrap, chk.checked));
+  });
+  // Al limpiar un formulario, se vuelven a ocultar los cuadros de "Otros..."
+  $$("form").forEach((form) => form.addEventListener("reset", () => setTimeout(() => {
+    $$("[data-otros-wrap], #f-cultivo-otro-wrap", form).forEach((w) => alternarOtro(w, false));
+  })));
+}
+/** Cambia "__otros" por lo que escribió la persona. Devuelve error si falta el texto. */
+function resolverPreferencias(d) {
+  const otro = (d.preferencia_otro || "").trim();
+  delete d.preferencia_otro;
+  if (!d.preferencias.includes("__otros")) return null;
+  if (!otro) return "Escribe qué otros productos o cultivos te interesan.";
+  d.preferencias = d.preferencias.filter((x) => x !== "__otros").concat(otro);
+  d.preferencia_otros = otro; // también se guarda aparte
+  return null;
+}
+
+/* =====================================================================
    NAVEGACIÓN (rutas con #) + HEADER
    ===================================================================== */
 const RUTAS = {
   "/": { screen: "inicio", nav: [["#/lotes", "Lotes en venta"], ["#como-funciona", "Cómo funciona"]] },
+  "/login": { screen: "login", back: ["#/", "Volver al inicio"], antes: () => mostrarError($("#form-login"), "") },
   "/agricultor/registro": { screen: "registro", back: ["#/", "Atrás"], antes: () => configurarRegistro("agricultor") },
   "/agricultor/datos": { screen: "agricultor-datos", back: ["#/agricultor/registro", "Atrás"] },
   "/agricultor/finca": { screen: "agricultor-finca", back: ["#/agricultor/datos", "Atrás"] },
@@ -804,6 +845,7 @@ const RUTAS = {
 function router() {
   const hash = location.hash.replace(/^#/, "") || "/";
   if (!hash.startsWith("/")) return; // anclas internas como #como-funciona
+  if (hash === "/salir") { cerrarSesion(); return; }
   const [ruta, param] = hash.startsWith("/lote/") ? ["/lote", decodeURIComponent(hash.slice(6))] : [hash, null];
   const conf = RUTAS[ruta] || RUTAS["/"];
 
@@ -814,6 +856,11 @@ function router() {
   const links = (conf.nav || []).map(([href, txt, activo]) =>
     `<a href="${href}" class="${activo ? "border-b-2 border-lima pb-1 font-semibold text-white" : "navlink"}" ${activo ? 'aria-current="page"' : ""}>${txt}</a>`);
   if (conf.back) links.push(`<a href="${conf.back[0]}" class="navlink">← ${conf.back[1]}</a>`);
+  if (!conf.back) {
+    links.push(estado.usuarioId
+      ? `<a href="#${rutaPerfil()}" class="navlink">Mi perfil</a><a href="#/salir" class="rounded-full border border-menta px-4 py-2 font-semibold text-white hover:bg-white/10">Cerrar sesión</a>`
+      : `<a href="#/login" class="rounded-full bg-lima px-[18px] py-2.5 font-semibold text-bosque">Iniciar sesión</a>`);
+  }
   $("#nav").innerHTML = links.join("");
 
   // Prellenar correo en los formularios de datos personales
@@ -878,6 +925,83 @@ function handleSubmitRegistro(e) {
 }
 $("#form-registro").addEventListener("submit", handleSubmitRegistro);
 
+/* =====================================================================
+   CUENTAS – Supabase Auth (la contraseña la guarda y verifica Supabase,
+   cifrada; nunca se guarda en la tabla `contactos`)
+   ===================================================================== */
+const edadDesde = (fecha) => {
+  if (!fecha) return null;
+  const n = new Date(fecha + "T00:00:00"), hoy = new Date();
+  let e = hoy.getFullYear() - n.getFullYear();
+  if (hoy < new Date(hoy.getFullYear(), n.getMonth(), n.getDate())) e--;
+  return e >= 0 ? e : null;
+};
+const rutaPerfil = () =>
+  estado.tipoUsuario === "agricultor" ? (estado.finca ? "/agricultor/publicaciones" : "/agricultor/finca") : "/lotes";
+
+/** Carga en `estado` los datos del usuario que inició sesión */
+function aplicarUsuario(user) {
+  const meta = user.user_metadata || {};
+  estado.usuarioId = user.id;
+  estado.correo = user.email;
+  estado.tipoUsuario = meta.tipo || null;
+  estado.perfil = { nombres: meta.nombres, apellidos: meta.apellidos, fecha_nacimiento: meta.fecha_nacimiento, telefono_whatsapp: meta.telefono_whatsapp };
+  estado.finca = meta.finca || null;
+  guardarSesion();
+}
+
+/** Crea la cuenta en Supabase Auth. Lanza un error legible si falla. */
+async function crearCuenta(correo, password, datos) {
+  const { data, error } = await db.auth.signUp({ email: correo, password, options: { data: datos } });
+  if (error) {
+    if (/already|registered|exists/i.test(error.message)) throw new Error("Ese correo ya tiene una cuenta. Usa “Iniciar sesión”.");
+    if (/password/i.test(error.message)) throw new Error("La contraseña no es válida: usa al menos 8 caracteres.");
+    throw new Error("No se pudo crear la cuenta: " + error.message);
+  }
+  // Supabase devuelve un usuario sin identidades si el correo ya existía
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    throw new Error("Ese correo ya tiene una cuenta. Usa “Iniciar sesión”.");
+  }
+  if (data.session) aplicarUsuario(data.session.user);
+  else estado.avisoPendiente = "Cuenta creada. Revisa tu correo para confirmarla antes de iniciar sesión.";
+  return data;
+}
+
+async function cerrarSesion() {
+  try { await db.auth.signOut(); } catch {}
+  Object.assign(estado, { usuarioId: null, correo: "", tipoUsuario: null, perfil: null, finca: null });
+  try { localStorage.removeItem(SESION_KEY); } catch {}
+  ir("/");
+}
+
+/* ---------- INICIAR SESIÓN ---------- */
+async function handleSubmitLogin(e) {
+  e.preventDefault();
+  const form = e.target;
+  const { correo, password } = leerFormulario(form);
+  if (!correo || !password) { mostrarError(form, "Escribe tu correo y tu contraseña."); return; }
+
+  const boton = $('button[type="submit"]', form);
+  boton.disabled = true; boton.textContent = "Ingresando…";
+  mostrarError(form, "");
+  const { data, error } = await db.auth.signInWithPassword({ email: correo.toLowerCase(), password });
+  boton.disabled = false; boton.textContent = "Ingresar";
+
+  if (error) {
+    const msg = /not confirmed/i.test(error.message)
+      ? "Tu correo aún no está confirmado. Revisa tu bandeja de entrada."
+      : "Usuario o contraseña incorrectos";
+    mostrarError(form, msg);
+    avisar(msg, "error");
+    return;
+  }
+  aplicarUsuario(data.user);
+  form.reset();
+  avisar("¡Bienvenido de nuevo!");
+  ir(rutaPerfil());
+}
+$("#form-login").addEventListener("submit", handleSubmitLogin);
+
 /* Valida y transforma datos personales a columnas de la tabla `usuarios` */
 function prepararUsuario(d, tipo) {
   if (d.password.length < 8) return { error: "La contraseña debe tener al menos 8 caracteres." };
@@ -908,12 +1032,23 @@ async function handleSubmitAgricultor(e) {
   mostrarError(form, error);
   if (error) return;
   const { tipo, ...datosUsuario } = fila;
-  const ok = await guardarFormulario(form, () =>
-    enviarDatos("registro_agricultor", datosUsuario, { foto_perfil: estado.archivos["agr-foto"] }));
+  const password = $('[name="password"]', form).value;
+  const ok = await guardarFormulario(form, async () => {
+    await crearCuenta(datosUsuario.correo, password, {
+      tipo: "agricultor", nombres: datosUsuario.nombres, apellidos: datosUsuario.apellidos,
+      fecha_nacimiento: datosUsuario.fecha_nacimiento, telefono_whatsapp: datosUsuario.telefono_whatsapp, usuario: datosUsuario.usuario,
+    });
+    await enviarDatos("registro_agricultor", datosUsuario, { foto_perfil: estado.archivos["agr-foto"] });
+  });
   if (!ok) return;
+  // Usuario nuevo: perfil limpio, sin chacra ni publicaciones
   estado.correo = datosUsuario.correo;
-  estado.finca = null;          // usuario nuevo: todavía no tiene chacra
+  estado.tipoUsuario = "agricultor";
+  estado.perfil = { nombres: datosUsuario.nombres, apellidos: datosUsuario.apellidos, fecha_nacimiento: datosUsuario.fecha_nacimiento, telefono_whatsapp: datosUsuario.telefono_whatsapp };
+  estado.finca = null;
+  estado.publicacionesSesion = [];
   guardarSesion();
+  form.reset();
   ir("/agricultor/finca");
 }
 $("#form-agricultor").addEventListener("submit", handleSubmitAgricultor);
@@ -926,6 +1061,14 @@ async function handleSubmitFinca(e) {
   const form = e.target;
   const d = leerFormulario(form);
   const fila = { ...d };
+  // "Otros...": el cultivo escrito es obligatorio y se guarda como cultivo principal
+  delete fila.cultivo_otro;
+  if (d.cultivo_principal === "__otros") {
+    const otro = (d.cultivo_otro || "").trim();
+    if (!otro) { mostrarError(form, "Escribe tu cultivo principal."); $("#f-cultivo-otro").focus(); return; }
+    fila.cultivo_principal = otro;
+    fila.cultivo_otro = otro;
+  }
   fila.area_hectareas = d.area_hectareas ? Number(d.area_hectareas) : null;
   fila.riego = d.riego || null;
   const ok = await guardarFormulario(form, () => enviarDatos("perfil_finca", fila));
@@ -933,6 +1076,8 @@ async function handleSubmitFinca(e) {
 
   estado.finca = { ...fila, ubicacion: [fila.distrito, fila.provincia].filter(Boolean).join(", ") + " – " + fila.departamento };
   guardarSesion();
+  // Guarda la chacra en la cuenta, para verla al iniciar sesión desde otro equipo
+  if (estado.usuarioId) db.auth.updateUser({ data: { finca: estado.finca } }).catch(() => {});
   ir("/agricultor/publicaciones");
 }
 $("#form-finca").addEventListener("submit", handleSubmitFinca);
@@ -1065,6 +1210,15 @@ async function handleSubmitLote(e) {
   const total = calcularLote();
   fila.valor_estimado = total;
   fila.finca = estado.finca?.nombre_finca ?? null;
+  fila.ubicacion = estado.finca ? { departamento: estado.finca.departamento, provincia: estado.finca.provincia, distrito: estado.finca.distrito } : null;
+  const pf = estado.perfil || {};
+  fila.productor = {
+    nombres: pf.nombres || estado.finca?.nombre_productor || "",
+    apellidos: pf.apellidos || "",
+    edad: edadDesde(pf.fecha_nacimiento),
+    whatsapp: pf.telefono_whatsapp || null,
+    correo: estado.correo || null,
+  };
   const ok = await guardarFormulario(form, () =>
     enviarDatos("lote_cosecha", fila, { fotos_lote: estado.archivos.fotos_lote }));
   if (!ok) return;
@@ -1135,20 +1289,29 @@ async function handleSubmitPersona(e) {
   const form = e.target;
   const d = leerFormulario(form);
   const { fila, error } = prepararUsuario(d, "comprador_persona");
-  const err = error || (d.preferencias.length ? null : "Elige al menos una preferencia de compra.");
+  const err = error || (d.preferencias.length ? null : "Elige al menos una preferencia de compra.") || resolverPreferencias(d);
   mostrarError(form, err);
   if (err) return;
 
   const { tipo, ...datosUsuario } = fila;
-  const ok = await guardarFormulario(form, () => enviarDatos("registro_comprador_persona", {
-    ...datosUsuario,
-    preferencias: d.preferencias,
-    frecuencia_compra: d.frecuencia_compra,
-    zona_entrega: d.zona_entrega,
-  }, { foto_perfil: estado.archivos["per-foto"] }));
+  const ok = await guardarFormulario(form, async () => {
+    await crearCuenta(datosUsuario.correo, d.password, {
+      tipo: "comprador_persona", nombres: datosUsuario.nombres, apellidos: datosUsuario.apellidos,
+      fecha_nacimiento: datosUsuario.fecha_nacimiento, telefono_whatsapp: datosUsuario.telefono_whatsapp, usuario: datosUsuario.usuario,
+    });
+    await enviarDatos("registro_comprador_persona", {
+      ...datosUsuario,
+      preferencias: d.preferencias,
+      ...(d.preferencia_otros ? { preferencia_otros: d.preferencia_otros } : {}),
+      frecuencia_compra: d.frecuencia_compra,
+      zona_entrega: d.zona_entrega,
+    }, { foto_perfil: estado.archivos["per-foto"] });
+  });
   if (!ok) return;
   estado.correo = datosUsuario.correo;
+  estado.tipoUsuario = "comprador_persona";
   guardarSesion();
+  form.reset();
   ir("/lotes");
 }
 $("#form-persona").addEventListener("submit", handleSubmitPersona);
@@ -1160,7 +1323,7 @@ async function handleSubmitEmpresa(e) {
   e.preventDefault();
   const form = e.target;
   const fila = leerFormulario(form);
-  const err = fila.preferencias.length ? null : "Elige al menos una preferencia de compra.";
+  const err = (fila.preferencias.length ? null : "Elige al menos una preferencia de compra.") || resolverPreferencias(fila);
   mostrarError(form, err);
   if (err) return;
 
@@ -1170,66 +1333,141 @@ async function handleSubmitEmpresa(e) {
 $("#form-empresa").addEventListener("submit", handleSubmitEmpresa);
 
 /* =====================================================================
-   12 · LOTES EN VENTA (búsqueda y filtros)
+   12 · LOTES EN VENTA – datos reales de Supabase (sin datos fijos)
    ===================================================================== */
-function renderLotes() {
+const MSG_SIN_LOTES = "No hay lotes disponibles en venta en este momento.";
+const cajaMensaje = (texto) => `<p class="col-span-full rounded-2xl border border-borde bg-white p-10 text-center text-[16px] text-musgo">${texto}</p>`;
+
+/** Convierte una fila de `contactos` (tipo lote_cosecha) en un lote para mostrar */
+function aLote(r) {
+  const d = r.datos || {}, u = d.ubicacion || {}, p = d.productor || {};
+  return {
+    id: String(r.id),
+    email: r.email,
+    fechaPublicacion: r.created_at,
+    producto: d.producto || "Producto",
+    variedad: d.variedad || "",
+    categoria: d.categoria || "",
+    cantidad: Number(d.cantidad_estimada) || 0,
+    unidad: d.unidad || "kg",
+    precio: Number(d.precio_sugerido) || 0,
+    calidad: d.calidad || "—",
+    disponible: d.disponible_desde || null,
+    entrega: d.entrega || "",
+    comentarios: d.comentarios || "",
+    estado: d.estado || "pendiente_pago",
+    finca: { nombre: d.finca || "Chacra", depto: u.departamento || "", prov: u.provincia || "", dist: u.distrito || "" },
+    productor: {
+      nombres: p.nombres || "", apellidos: p.apellidos || "",
+      edad: p.edad ?? null, wsp: p.whatsapp || null, correo: p.correo || r.email || null,
+    },
+  };
+}
+
+async function cargarLotes() {
+  const { data, error } = await db
+    .from("contactos")
+    .select("id, created_at, tipo, email, datos")
+    .eq("tipo", "lote_cosecha")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  lotesCache = (data || []).map(aLote);
+  // Regiones disponibles según los lotes reales
+  const sel = $("#b-region"), actual = sel.value;
+  const regiones = [...new Set(lotesCache.map((l) => l.finca.depto).filter(Boolean))].sort();
+  sel.innerHTML = `<option value="">Todas las regiones</option>` + regiones.map((r) => `<option>${esc(r)}</option>`).join("");
+  sel.value = regiones.includes(actual) ? actual : "";
+  return lotesCache;
+}
+
+const ubicacionTexto = (f) => [f.prov, f.depto].filter(Boolean).join(", ");
+const nombreProductor = (p) => [p.nombres, p.apellidos].filter(Boolean).join(" ") || "Productor";
+
+function tarjetaLote(l) {
+  const u = unidadCorta(l.unidad), p = l.productor;
+  const ini = ((p.nombres || "P").charAt(0) + (p.apellidos || "").charAt(0)).toUpperCase();
+  return `
+    <a href="#/lote/${encodeURIComponent(l.id)}" class="group flex flex-col overflow-hidden rounded-2xl border border-borde bg-white transition hover:-translate-y-0.5 hover:border-hoja">
+      <div class="flex h-44 items-end justify-between bg-brote p-3.5">
+        <span class="text-[13px] text-musgo">Foto de la finca</span>
+        ${l.categoria ? `<span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-bosque">${esc(l.categoria)}</span>` : ""}
+      </div>
+      <div class="flex flex-col gap-2.5 p-4">
+        <div class="flex items-center gap-2.5">
+          <span aria-hidden="true" class="flex h-10 w-10 items-center justify-center rounded-full bg-menta text-sm font-bold text-bosque">${esc(ini)}</span>
+          <div class="flex flex-col">
+            <span class="font-display text-lg font-semibold">${esc(l.finca.nombre)}</span>
+            <span class="text-[13px] text-musgo">${esc(nombreProductor(p))}${ubicacionTexto(l.finca) ? " · " + esc(ubicacionTexto(l.finca)) : ""}</span>
+          </div>
+        </div>
+        <div class="flex items-baseline justify-between gap-2 border-t border-borde pt-2.5">
+          <span class="text-[15px] font-semibold">${esc(l.producto)} · ${l.cantidad.toLocaleString("es-PE")} ${u}</span>
+          <span class="whitespace-nowrap font-display text-lg font-bold text-hoja">${soles(l.precio)}/${u}</span>
+        </div>
+        <span class="text-sm font-semibold text-hoja group-hover:underline">Ver lote →</span>
+      </div>
+    </a>`;
+}
+
+/** Pinta la lista con los filtros actuales (sin volver a consultar) */
+function pintarLotes() {
   const texto = $("#b-texto").value.trim().toLowerCase();
   const region = $("#b-region").value;
   const categoria = $("#b-cat").value;
-  const lista = LOTES.filter((l) =>
-    (!texto || [l.producto, l.finca.nombre, l.finca.depto, l.finca.prov].some((s) => s.toLowerCase().includes(texto))) &&
+  const lista = lotesCache.filter((l) =>
+    (!texto || [l.producto, l.finca.nombre, l.finca.depto, l.finca.prov].some((s) => (s || "").toLowerCase().includes(texto))) &&
     (!region || l.finca.depto === region) &&
     (!categoria || l.categoria === categoria));
 
-  $("#lotes-count").textContent = `${lista.length} fincas con lotes disponibles`;
-  $("#lotes-lista").innerHTML = lista.length ? lista.map((l) => {
-    const u = unidadCorta(l.unidad);
-    return `
-      <a href="#/lote/${encodeURIComponent(l.id)}" class="group flex flex-col overflow-hidden rounded-2xl border border-borde bg-white transition hover:-translate-y-0.5 hover:border-hoja">
-        <div class="flex h-44 items-end justify-between bg-brote p-3.5">
-          <span class="text-[13px] text-musgo">Foto de la finca</span>
-          <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-bosque">${esc(l.categoria)}</span>
-        </div>
-        <div class="flex flex-col gap-2.5 p-4">
-          <div class="flex items-center gap-2.5">
-            <span aria-hidden="true" class="flex h-10 w-10 items-center justify-center rounded-full bg-menta text-sm font-bold text-bosque">${esc(l.productor.nombres[0] + l.productor.apellidos[0])}</span>
-            <div class="flex flex-col">
-              <span class="font-display text-lg font-semibold">${esc(l.finca.nombre)}</span>
-              <span class="text-[13px] text-musgo">${esc(l.productor.nombres)} ${esc(l.productor.apellidos.split(" ")[0])} · ${esc(l.finca.prov)}, ${esc(l.finca.depto)}</span>
-            </div>
-          </div>
-          <div class="flex items-baseline justify-between gap-2 border-t border-borde pt-2.5">
-            <span class="text-[15px] font-semibold">${esc(l.producto)} · ${l.cantidad.toLocaleString("es-PE")} ${u}</span>
-            <span class="whitespace-nowrap font-display text-lg font-bold text-hoja">${soles(l.precio)}/${u}</span>
-          </div>
-          <span class="text-sm font-semibold text-hoja group-hover:underline">Ver lote →</span>
-        </div>
-      </a>`;
-  }).join("") : `<p class="col-span-full rounded-2xl border border-borde bg-white p-8 text-center text-musgo">No encontramos lotes con esos filtros.</p>`;
+  if (!lotesCache.length) {
+    $("#lotes-count").textContent = "";
+    $("#lotes-lista").innerHTML = cajaMensaje(MSG_SIN_LOTES);
+    return;
+  }
+  $("#lotes-count").textContent = lista.length === 1 ? "1 lote disponible" : `${lista.length} lotes disponibles`;
+  $("#lotes-lista").innerHTML = lista.length ? lista.map(tarjetaLote).join("") : cajaMensaje("No encontramos lotes con esos filtros.");
+}
+
+async function renderLotes() {
+  $("#lotes-count").textContent = "";
+  $("#lotes-lista").innerHTML = cajaMensaje("Cargando lotes…");
+  try {
+    await cargarLotes();
+    pintarLotes();
+  } catch (err) {
+    console.error("[AgroConnect] No se pudieron cargar los lotes:", err);
+    lotesCache = [];
+    $("#lotes-lista").innerHTML = cajaMensaje(MSG_SIN_LOTES);
+  }
 }
 function handleSubmitBusqueda(e) {
   e.preventDefault();
-  console.log("[AgroConnect] Búsqueda:", leerFormulario(e.target));
-  renderLotes();
+  pintarLotes();
 }
 $("#form-busqueda").addEventListener("submit", handleSubmitBusqueda);
-["#b-region", "#b-cat"].forEach((s) => $(s).addEventListener("change", renderLotes));
-$("#b-texto").addEventListener("input", renderLotes);
+["#b-region", "#b-cat"].forEach((s) => $(s).addEventListener("change", pintarLotes));
+$("#b-texto").addEventListener("input", pintarLotes);
 
 /* =====================================================================
-   13 · DETALLE DEL LOTE
+   13 · DETALLE DEL LOTE + PERFIL DEL PRODUCTOR
    ===================================================================== */
-function renderDetalle(id) {
-  const l = LOTES.find((x) => x.id === id);
+async function renderDetalle(id) {
   const cont = $("#detalle");
-  if (!l) { cont.innerHTML = `<p class="rounded-2xl border border-borde bg-white p-8 text-center text-musgo">Este lote ya no está disponible. <a href="#/lotes" class="font-semibold text-hoja">Ver otros lotes</a></p>`; return; }
+  cont.innerHTML = cajaMensaje("Cargando lote…");
+  try { if (!lotesCache.some((x) => x.id === id)) await cargarLotes(); } catch (err) { console.error(err); }
+  const l = lotesCache.find((x) => x.id === id);
+  if (!l) { cont.innerHTML = cajaMensaje(`Este lote ya no está disponible. <a href="#/lotes" class="font-semibold text-hoja">Ver lotes en venta</a>`); return; }
 
   const p = l.productor, f = l.finca, u = unidadCorta(l.unidad);
+  const ini = ((p.nombres || "P").charAt(0) + (p.apellidos || "").charAt(0)).toUpperCase();
   const fecha = l.disponible ? new Date(l.disponible + "T00:00:00").toLocaleDateString("es-PE") : "Inmediata";
   const detalles = [
     ["Cantidad estimada", `${l.cantidad.toLocaleString("es-PE")} ${u}`], ["Variedad", l.variedad || "—"], ["Calidad", l.calidad],
-    ["Disponible desde", fecha], ["Entrega", ENTREGAS[l.entrega]], ["Valor estimado", soles(l.cantidad * l.precio)],
+    ["Disponible desde", fecha], ["Entrega", ENTREGAS[l.entrega] || "—"], ["Valor estimado", soles(l.cantidad * l.precio)],
   ];
+  // Historial de ventas: lotes de este mismo productor marcados como vendidos
+  const ventas = lotesCache.filter((x) => x.email && x.email === l.email && x.estado === "vendido");
+  const ubic = [f.dist, f.prov, f.depto].filter(Boolean).join(", ");
 
   cont.innerHTML = `
     <div class="flex flex-wrap gap-7">
@@ -1238,9 +1476,9 @@ function renderDetalle(id) {
         <div class="flex flex-col gap-5 rounded-3xl border border-borde bg-white p-7">
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="flex flex-col gap-1.5">
-              <span class="self-start rounded-full bg-menta px-2.5 py-1 text-xs font-semibold text-bosque">${esc(l.categoria)} · Disponible</span>
+              ${l.categoria ? `<span class="self-start rounded-full bg-menta px-2.5 py-1 text-xs font-semibold text-bosque">${esc(l.categoria)}</span>` : ""}
               <h1 class="font-display text-4xl font-bold text-bosque">${esc(l.producto)}</h1>
-              <span class="text-[15px] text-musgo">${esc(f.nombre)} · ${esc(f.prov)}, ${esc(f.depto)}</span>
+              <span class="text-[15px] text-musgo">${esc(f.nombre)}${ubicacionTexto(f) ? " · " + esc(ubicacionTexto(f)) : ""}</span>
             </div>
             <div class="sm:text-right">
               <span class="block font-display text-3xl font-bold text-hoja">${soles(l.precio)}</span>
@@ -1259,29 +1497,29 @@ function renderDetalle(id) {
         <div class="flex flex-col gap-4 rounded-3xl border border-borde bg-white p-6">
           <h2 class="font-display text-xl font-semibold">Perfil del productor</h2>
           <div class="flex items-center gap-3.5">
-            <span aria-hidden="true" class="flex h-16 w-16 items-center justify-center rounded-full bg-hoja font-display text-[22px] font-bold text-white">${esc(p.nombres[0] + p.apellidos[0])}</span>
+            <span aria-hidden="true" class="flex h-16 w-16 items-center justify-center rounded-full bg-hoja font-display text-[22px] font-bold text-white">${esc(ini)}</span>
             <div class="flex flex-col">
-              <span class="font-display text-lg font-semibold">${esc(p.nombres)} ${esc(p.apellidos)}</span>
-              <span class="text-sm text-musgo">${p.edad} años</span>
+              <span class="font-display text-lg font-semibold">${esc(nombreProductor(p))}</span>
+              ${p.edad != null ? `<span class="text-sm text-musgo">${p.edad} años</span>` : ""}
             </div>
           </div>
           <div class="flex flex-col gap-2">
             <span class="text-sm font-semibold">Ubicación de la parcela</span>
             <div class="flex h-36 items-center justify-center gap-2 rounded-xl border border-borde bg-brote px-3 text-center text-sm text-musgo">
               <svg class="h-5 w-5 shrink-0 text-hoja" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-              ${esc(f.dist)}, ${esc(f.prov)} – ${esc(f.depto)}
+              ${esc(ubic || "Sin ubicación registrada")}
             </div>
           </div>
         </div>
 
         <div class="flex flex-col gap-3 rounded-3xl border border-borde bg-white p-6">
           <h2 class="font-display text-xl font-semibold">Historial de ventas</h2>
-          ${l.historial.length ? `
+          ${ventas.length ? `
             <div class="overflow-x-auto"><table class="w-full text-sm">
               <thead><tr class="border-b border-borde text-left text-musgo"><th scope="col" class="py-2 font-semibold">Producto</th><th scope="col" class="py-2 font-semibold">Cantidad</th><th scope="col" class="py-2 text-right font-semibold">Fecha</th></tr></thead>
-              <tbody>${l.historial.map(([pr, c, fe]) => `<tr class="border-b border-fondo"><td class="py-2.5">${esc(pr)}</td><td class="py-2.5">${esc(c)}</td><td class="py-2.5 text-right text-musgo">${esc(fe)}</td></tr>`).join("")}</tbody>
+              <tbody>${ventas.map((v) => `<tr class="border-b border-fondo"><td class="py-2.5">${esc(v.producto)}</td><td class="py-2.5">${v.cantidad.toLocaleString("es-PE")} ${unidadCorta(v.unidad)}</td><td class="py-2.5 text-right text-musgo">${new Date(v.fechaPublicacion).toLocaleDateString("es-PE")}</td></tr>`).join("")}</tbody>
             </table></div>` : `<p class="text-sm text-musgo">Aún no tiene ventas registradas en AgroConnect.</p>`}
-          <span class="text-[13px] text-musgo">${l.historial.length} ventas completadas</span>
+          <span class="text-[13px] text-musgo">${ventas.length} ${ventas.length === 1 ? "venta completada" : "ventas completadas"}</span>
         </div>
       </aside>
     </div>
@@ -1300,21 +1538,30 @@ function renderDetalle(id) {
    ===================================================================== */
 function abrirContacto(l) {
   const p = l.productor;
-  const msg = `Hola ${p.nombres}, me interesa tu lote de ${l.producto.toLowerCase()} publicado en AgroConnect.`;
-  const telVisible = "+" + p.wsp.replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/, "$1 $2 $3 $4");
+  const nombre = nombreProductor(p);
+  const msg = `Hola ${p.nombres || ""}, me interesa tu lote de ${l.producto.toLowerCase()} publicado en AgroConnect.`.replace("Hola ,", "Hola,");
+  const wsp = (p.wsp || "").replace(/\D/g, "");
+  const wspIntl = wsp.length === 9 ? "51" + wsp : wsp; // celular peruano de 9 dígitos → 51XXXXXXXXX
+  const telVisible = wspIntl ? "+" + wspIntl.replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/, "$1 $2 $3 $4") : "";
 
-  $("#contacto-ini").textContent = p.nombres[0] + p.apellidos[0];
-  $("#contacto-nombre").textContent = `${p.nombres} ${p.apellidos}`;
+  $("#contacto-ini").textContent = ((p.nombres || "P").charAt(0) + (p.apellidos || "").charAt(0)).toUpperCase();
+  $("#contacto-nombre").textContent = nombre;
   $("#contacto-lote").textContent = `${l.finca.nombre} · ${l.producto}`;
   $$("[data-tel]").forEach((s) => (s.textContent = telVisible));
-  $("#c-mail-txt").textContent = p.correo;
+  $("#c-mail-txt").textContent = p.correo || "";
 
-  $("#c-wsp").href = `https://wa.me/${p.wsp}?text=${encodeURIComponent(msg)}`; // abre la app de WhatsApp
-  $("#c-tel").href = `tel:+${p.wsp}`;
-  $("#c-mail").href = `mailto:${p.correo}?subject=${encodeURIComponent("Lote de " + l.producto + " – AgroConnect")}&body=${encodeURIComponent(msg)}`;
+  // Solo se muestran los botones con datos reales del productor
+  $("#c-wsp").classList.toggle("hidden", !wspIntl);
+  $("#c-tel").classList.toggle("hidden", !wspIntl);
+  $("#c-mail").classList.toggle("hidden", !p.correo);
+  if (wspIntl) {
+    $("#c-wsp").href = `https://wa.me/${wspIntl}?text=${encodeURIComponent(msg)}`; // abre la app de WhatsApp
+    $("#c-tel").href = `tel:+${wspIntl}`;
+  }
+  if (p.correo) $("#c-mail").href = `mailto:${p.correo}?subject=${encodeURIComponent("Lote de " + l.producto + " – AgroConnect")}&body=${encodeURIComponent(msg)}`;
 
   const registrar = (canal) =>
-    enviarDatos("interes_lote", { lote_id: l.id, producto: l.producto, finca: l.finca.nombre, productor: `${p.nombres} ${p.apellidos}`, canal })
+    enviarDatos("interes_lote", { lote_id: l.id, producto: l.producto, finca: l.finca.nombre, productor: nombre, canal })
       .catch((err) => console.error(err));
   $("#c-wsp").onclick = () => registrar("whatsapp");
   $("#c-tel").onclick = () => registrar("llamada");
@@ -1327,11 +1574,18 @@ function abrirContacto(l) {
    INICIO
    ===================================================================== */
 iniciarPlantillas();
-$("#b-region").innerHTML += [...new Set(LOTES.map((l) => l.finca.depto))].sort().map((r) => `<option>${r}</option>`).join("");
+iniciarOtros();
 $("#b-cat").innerHTML += CATEGORIAS.map((c) => `<option>${c}</option>`).join("");
 $("#lote-pct-label").textContent = `Tarifa de publicación (${CONFIG.comisionPorcentaje}%)`;
 window.addEventListener("hashchange", router);
-router();
+
+(async function arrancar() {
+  try {
+    const { data } = await db.auth.getSession();
+    if (data?.session?.user) aplicarUsuario(data.session.user);
+  } catch (err) { console.warn("[AgroConnect] No se pudo leer la sesión:", err); }
+  router();
+})();
 </script>
 </body>
 </html>
